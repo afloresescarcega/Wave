@@ -21,27 +21,32 @@
 
 <body style="margin: 0%; overflow: hidden;">
   <div id="row0" class="block" id="top-half" style="display: flex; background-color: red; width:100vw;">
-    <div style="height: 50vh; width:50vw;">Hello</div>
-    <div style="height: 50vh; width:50vw;   display:flex;justify-content:center;align-items:center;font-size:500%;">Hello omg lmao</div>
+    <div class="block0" id="block0col0" style="height: 50vh; min-width:50vw;">Hello</div>
+    <div class="block0" id="block0col0" style="height: 50vh; min-width:50vw;   display:flex;justify-content:center;align-items:center;font-size:500%;">Hello omg lmao</div>
+    <div class="block0" id="block0col0" style="height: 50vh; min-width:50vw;   display:flex;justify-content:center;align-items:center;font-size:500%;">Hello omg lmao</div>
   </div>
-  <div id="row1" class="block" style="display: flex;">
-    <div id="bottom-left1" style="background-color: orangered; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
-    <div id="bottom-right1" style="background-color: orange; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
+  <div id="row1" class="block" style="display: flex; ">
+    <div class="block1" id="block1col0" style="background-color: orangered; height: 50vh; min-width:50%;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
+    <div class="block1" id="block1col1" style="background-color: orange; height: 50vh; min-width:50%;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
+    <div class="block1" id="block1col2" style="background-color: black; height: 50vh; min-width:50%;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
   </div>
   <div id="row2" class="block" style="display: flex;">
-    <div id="bottom-left2" style="background-color: darkcyan; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
-    <div id="bottom-righ2" style="background-color: blue; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
+    <div class="block2" id="block2col0" style="background-color: darkcyan; height: 50vh; min-width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
+    <div class="block2" id="block2col1" style="background-color: blue; height: 50vh; min-width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
+    <div class="block2" id="block2col2" style="background-color: pink; height: 50vh; min-width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
   </div>
 </body>
 
 <script>
   var colors = ["red", "blueviolet", "purple", "blue", "darkcyan", "green", "greenyellow", "yellow", "orange", "orangered"];
   document.addEventListener('keydown', logKey);
-  var index = 0;
+  var indexX = 0;
+  var indexY = 0;
 
   var hw = window.innerWidth  / 2;
   var hh = window.innerHeight / 2;
-  deltaPos = 0
+  deltaPosX = 0
+  deltaPosY = 0
 
   var mod = function (n, m) {
     var remain = n % m;
@@ -54,42 +59,57 @@
     console.log(document.getElementById("row2").getBoundingClientRect().y);
   }
 
-function logKey(e) {
-  if (e.keyCode == '38') {
-        // up arrow
-        console.log("Up");
-        deltaPos =  deltaPos + hh;
-          document.getElementById("row" + mod(index + 2, 3)).style.position = "absolute";
-          document.getElementById("row" + mod(index + 2, 3)).style.top = -deltaPos + "px";
-        let animations = anime({targets: ".block", translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
+  function logKey(e) {
+    if (e.keyCode == '38') {
+          // up arrow
+          console.log("Up");
+          deltaPosY =  deltaPosY + hh;
+          document.getElementById("row" + mod(indexY + 2, 3)).style.position = "absolute";
+          document.getElementById("row" + mod(indexY + 2, 3)).style.top = -deltaPosY + "px";
+          let animations = anime({targets: ".block", translateY: deltaPosY, easing: 'spring(1, 80, 10, 0)'});
           logPos();
-        index -= 1;
-          $("#row" + mod(index + 2, 3)).children(":first").html("" + index);
-    }
-    else if (e.keyCode == '40') {
-        // down arrow
-        console.log("Down");
-        deltaPos =  deltaPos - hh;
-          document.getElementById("row" + mod(index + 2, 3)).style.position = "absolute";
-          document.getElementById("row" + mod(index + 2, 3)).style.top = -deltaPos + hh + "px";
-          let animation = anime({targets: '.block', translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
+          indexY -= 1;
+          $("#row" + mod(indexY + 2, 3)).children(":first").html("" + indexY);
+      }
+      else if (e.keyCode == '40') {
+          // down arrow
+          console.log("Down");
+          deltaPosY =  deltaPosY - hh;
+          document.getElementById("row" + mod(indexY + 2, 3)).style.position = "absolute";
+          document.getElementById("row" + mod(indexY + 2, 3)).style.top = -deltaPosY + hh + "px";
+          let animation = anime({targets: '.block', translateY: deltaPosY, easing: 'spring(1, 80, 10, 0)'});
           logPos();
-        index += 1;
-          $("#row" + mod(index + 2, 3)).children(":first").html("" + index);
-    }
-    else if (e.keyCode == '37') {
-       // left arrow
-       console.log("Left");
-    }
-    else if (e.keyCode == '39') {
-       // right arrow
-       console.log("Right");
-    }
-    document.getElementById("top-half").style.backgroundColor = colors[index % colors.length]
-    document.getElementById("bottom-left").style.backgroundColor = colors[(index + 1) % colors.length]
-    document.getElementById("bottom-right").style.backgroundColor = colors[(index + 2) % colors.length]
-  console.log( ` ${e.code}`);
-}
+          indexY += 1;
+          $("#row" + mod(indexY + 2, 3)).children(":first").html("" + indexY);
+      }
+      else if (e.keyCode == '37') {
+        // left arrow
+        console.log("Left");
+        deltaPosX =  deltaPosX + hw;
+        target = '.block' + mod(indexY + 1, 3);
+        let animation = anime({targets: target, translateX: deltaPosX, easing: 'spring(1, 80, 10, 0)'});
+        indexX -= 1;
+
+      }
+      else if (e.keyCode == '39') {
+        // right arrow
+        console.log("Right");
+        deltaPosX =  deltaPosX - hw;
+        // document.getElementById("col" + mod(indexY + 2, 3)).style.position = "absolute";
+        // document.getElementById("block" + mod(indexY + 1, 3) + "col" + mod(indexX + 2, 3)).style.left = -deltaPosX + hw + "px";
+        target = '.block' + mod(indexY + 1, 3);
+        let animation = anime({targets: target, translateX: deltaPosX, easing: 'spring(1, 80, 10, 0)'});
+        logPos();
+        indexX += 1;
+        $("#row" + mod(indexX + 2, 3)).children(":first").html("" + indexX);
+      }
+      // document.getElementById('top-half').style.backgroundColor = colors[mod(indexY, colors.length)]
+      // document.getElementById('bottom-left1').style.backgroundColor = colors[mod((indexY + 1), colors.length)]
+      // document.getElementById('bottom-right1').style.backgroundColor = colors[mod((indexY + 2), colors.length)]
+      // document.getElementById('bottom-left2').style.backgroundColor = colors[mod((indexY + 3), colors.length)]
+      // document.getElementById('bottom-right3').style.backgroundColor = colors[mod((indexY + 4), colors.length)]
+    console.log( ` ${e.code}`);
+  }
 </script>
 
 </html>
