@@ -15,21 +15,22 @@
   <meta name="theme-color" content="#fafafa">
 
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
 
 </head>
 
 <body style="margin: 0%; overflow: hidden;">
-  <div id="row1" class="block" id="top-half" style="display: flex; background-color: red; width:100vw;">
+  <div id="row0" class="block" id="top-half" style="display: flex; background-color: red; width:100vw;">
     <div style="height: 50vh; width:50vw;">Hello</div>
     <div style="height: 50vh; width:50vw;   display:flex;justify-content:center;align-items:center;font-size:500%;">Hello omg lmao</div>
   </div>
-  <div id="row2" class="block" style="display: flex;">
-    <div id="bottom-left" style="background-color: orangered; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
-    <div id="bottom-right" style="background-color: orange; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu/research/what-lies-beneath-evidenc...</div>
+  <div id="row1" class="block" style="display: flex;">
+    <div id="bottom-left1" style="background-color: orangered; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
+    <div id="bottom-right1" style="background-color: orange; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
   </div>
-  <div id="row3" class="block" style="display: flex;">
-    <div id="bottom-left" style="background-color: darkcyan; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
-    <div id="bottom-right" style="background-color: blue; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu/research/what-lies-beneath-evidenc...</div>
+  <div id="row2" class="block" style="display: flex;">
+    <div id="bottom-left2" style="background-color: darkcyan; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
+    <div id="bottom-righ2" style="background-color: blue; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu /research/what-lies-beneath-evidenc...</div>
   </div>
 </body>
 
@@ -41,20 +42,40 @@
   var hw = window.innerWidth  / 2;
   var hh = window.innerHeight / 2;
   deltaPos = 0
+
+  var mod = function (n, m) {
+    var remain = n % m;
+    return Math.floor(remain >= 0 ? remain : remain + m);
+  };
+
+  function logPos() {
+    console.log(document.getElementById("row0").getBoundingClientRect().y);
+    console.log(document.getElementById("row1").getBoundingClientRect().y);
+    console.log(document.getElementById("row2").getBoundingClientRect().y);
+  }
+
 function logKey(e) {
   if (e.keyCode == '38') {
         // up arrow
         console.log("Up");
         deltaPos =  deltaPos + hh;
+          document.getElementById("row" + mod(index + 2, 3)).style.position = "absolute";
+          document.getElementById("row" + mod(index + 2, 3)).style.top = -deltaPos + "px";
         let animations = anime({targets: ".block", translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
+          logPos();
         index -= 1;
+          $("#row" + mod(index + 2, 3)).children(":first").html("" + index);
     }
     else if (e.keyCode == '40') {
         // down arrow
         console.log("Down");
         deltaPos =  deltaPos - hh;
-        let animation = anime({targets: ".block", translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
+          document.getElementById("row" + mod(index + 2, 3)).style.position = "absolute";
+          document.getElementById("row" + mod(index + 2, 3)).style.top = -deltaPos + hh + "px";
+          let animation = anime({targets: '.block', translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
+          logPos();
         index += 1;
+          $("#row" + mod(index + 2, 3)).children(":first").html("" + index);
     }
     else if (e.keyCode == '37') {
        // left arrow
