@@ -1,0 +1,72 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <meta name="theme-color" content="#fafafa">
+
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.0.1/lib/anime.min.js"></script>
+
+</head>
+
+<body style="margin: 0%;">
+  <div class="block" id="top-half" style="display: flex; background-color: red; width:100vw;">
+    <div style="height: 50vh; width:50vw;">Hello</div>
+    <div style="height: 50vh; width:50vw;   display:flex;justify-content:center;align-items:center;font-size:500%;">Hello omg lmao</div>
+  </div>
+  <div class="block" style="display: flex;">
+    <div id="bottom-left" style="background-color: orangered; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry.
+      The also know what they are doing instead of trying to reverse engineer it like these studies are.
+      
+      </div>
+    <div id="bottom-right" style="background-color: orange; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu/research/what-lies-beneath-evidenc...
+    </div>
+  </div>
+</body>
+
+<script>
+  var colors = ["red", "blueviolet", "purple", "blue", "darkcyan", "green", "greenyellow", "yellow", "orange", "orangered"];
+  document.addEventListener('keydown', logKey);
+  var index = 0;
+
+  var hw = window.innerWidth  / 2;
+  var hh = window.innerHeight / 2;
+
+function logKey(e) {
+  if (e.keyCode == '38') {
+        // up arrow
+        console.log("Up");
+        index -= 1;
+        let animations = anime({targets: ".block", translateY: -hh, easing: 'linear'})
+    }
+    else if (e.keyCode == '40') {
+        // down arrow
+        console.log("Down");
+        index += 1;
+        let animation = anime({targets: ".block", translateY: hh, easing: 'linear'})
+    }
+    else if (e.keyCode == '37') {
+       // left arrow
+       console.log("Left");
+    }
+    else if (e.keyCode == '39') {
+       // right arrow
+       console.log("Right");
+    }
+    document.getElementById("top-half").style.backgroundColor = colors[index % colors.length]
+    document.getElementById("bottom-left").style.backgroundColor = colors[(index + 1) % colors.length]
+    document.getElementById("bottom-right").style.backgroundColor = colors[(index + 2) % colors.length]
+  console.log( ` ${e.code}`);
+}
+</script>
+
+</html>
