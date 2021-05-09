@@ -18,18 +18,18 @@
 
 </head>
 
-<body style="margin: 0%;">
-  <div class="block" id="top-half" style="display: flex; background-color: red; width:100vw;">
+<body style="margin: 0%; overflow: hidden;">
+  <div id="row1" class="block" id="top-half" style="display: flex; background-color: red; width:100vw;">
     <div style="height: 50vh; width:50vw;">Hello</div>
     <div style="height: 50vh; width:50vw;   display:flex;justify-content:center;align-items:center;font-size:500%;">Hello omg lmao</div>
   </div>
-  <div class="block" style="display: flex;">
-    <div id="bottom-left" style="background-color: orangered; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry.
-      The also know what they are doing instead of trying to reverse engineer it like these studies are.
-      
-      </div>
-    <div id="bottom-right" style="background-color: orange; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu/research/what-lies-beneath-evidenc...
-    </div>
+  <div id="row2" class="block" style="display: flex;">
+    <div id="bottom-left" style="background-color: orangered; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
+    <div id="bottom-right" style="background-color: orange; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu/research/what-lies-beneath-evidenc...</div>
+  </div>
+  <div id="row3" class="block" style="display: flex;">
+    <div id="bottom-left" style="background-color: darkcyan; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">If you want more insight into this with less pejorative language, ditch the here ICIJ and the Brookings study and look at KPMG, Deloitte and PwC annual reports on the offshore industry. The also know what they are doing instead of trying to reverse engineer it like these studies are.</div>
+    <div id="bottom-right" style="background-color: blue; height: 50vh; width:50vw;    display:flex;justify-content:center;align-items:center;font-size:200%;">Direct PDF wasn't working for me. Here's the page with summary and link to PDF: https://www.brookings.edu/research/what-lies-beneath-evidenc...</div>
   </div>
 </body>
 
@@ -40,19 +40,21 @@
 
   var hw = window.innerWidth  / 2;
   var hh = window.innerHeight / 2;
-
+  deltaPos = 0
 function logKey(e) {
   if (e.keyCode == '38') {
         // up arrow
         console.log("Up");
+        deltaPos =  deltaPos + hh;
+        let animations = anime({targets: ".block", translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
         index -= 1;
-        let animations = anime({targets: ".block", translateY: -hh, easing: 'linear'})
     }
     else if (e.keyCode == '40') {
         // down arrow
         console.log("Down");
+        deltaPos =  deltaPos - hh;
+        let animation = anime({targets: ".block", translateY: deltaPos, easing: 'spring(1, 80, 10, 0)'});
         index += 1;
-        let animation = anime({targets: ".block", translateY: hh, easing: 'linear'})
     }
     else if (e.keyCode == '37') {
        // left arrow
