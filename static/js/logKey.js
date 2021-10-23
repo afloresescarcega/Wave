@@ -1,8 +1,3 @@
-/**
-functions that I need */
-
-// key processer
-
 function logKey(e) {
   if (e.keyCode == '38') {
     // up arrow
@@ -22,7 +17,18 @@ function logKey(e) {
   } else if (e.keyCode == '40') {
     // down arrow
     console.log("Down");
-    newFunction();
+    deltaPosY = deltaPosY - hh;
+    document.getElementById("row" + mod(indexY + 2, 3)).style.position = "absolute";
+    document.getElementById("row" + mod(indexY + 2, 3)).style.top = -deltaPosY + hh + "px";
+    let animation = anime({
+      targets: '.block',
+      translateY: deltaPosY,
+      easing: 'spring(1, 80, 10, 0)'
+    });
+    logPos();
+    indexY += 1;
+    $("#row" + mod(indexY + 2, 3)).children(":first").html("" + indexY);
+    console.log("X: " + indexX + " Y: " + indexY);
   } else if (e.keyCode == '37') {
     // left arrow
     console.log("Left");
@@ -63,24 +69,3 @@ function logKey(e) {
   console.log(`${e.code}`);
   update();
 }
-
-
-
-function newFunction() {
-  deltaPosY = deltaPosY - hh;
-  document.getElementById("row" + mod(indexY + 2, 3)).style.position = "absolute";
-  document.getElementById("row" + mod(indexY + 2, 3)).style.top = -deltaPosY + hh + "px";
-  let animation = anime({
-    targets: '.block',
-    translateY: deltaPosY,
-    easing: 'spring(1, 80, 10, 0)'
-  });
-  logPos();
-  indexY += 1;
-  $("#row" + mod(indexY + 2, 3)).children(":first").html("" + indexY);
-  console.log("X: " + indexX + " Y: " + indexY);
-}
-// row mover
-// up, right, down, left
-
-// update the text once after the rows have been moved
