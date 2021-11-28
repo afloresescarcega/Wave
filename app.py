@@ -33,12 +33,22 @@ def get_post_info():
     data = get_single_post_data(POSTID, headers)
         
 
-    print("This is data")
-    print(data.keys())
-    result = {'id': data['id'],
-                    'kids': list(data['kids']), 'time': data['time'], 'by': data['by']}
+    # print("This is data")
+    # print(data.keys())
+    print('About to operate on postId: ', POSTID)
+    result = {'id': data['id'], 'time': data['time'], 'by': data['by']}
+    if 'parent' in data:
+        result['parent'] = data['parent']
+    if 'kids' in data:
+        result['kids'] = list(data['kids'])
+    else:
+        result['kids'] = []
     if data['type'] == 'comment':
         result['text'] = data['text']
+    elif data['type'] == 'story':
+        result['title'] = data['title']
+        if 'url' in data:
+            result['url'] = data['url']
     response = jsonify(result)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
@@ -47,8 +57,8 @@ def get_single_post_data(POSTID, headers):
     data = REDIS_CACHE.get(POSTID)
     if data is not None and data.decode() != "":
         data = json.loads(data.decode())
-        print(type(data))
-        print("data: " + str(data))
+        # print(type(data))
+        # print("data: " + str(data))
         print("getting from cache: ", POSTID)
     else:
         r = requests.get(
@@ -57,7 +67,7 @@ def get_single_post_data(POSTID, headers):
             '.json?print=pretty',
             headers=headers)
         data = r.json()
-        print("from hn", data)
+        # print("from hn", data)
         REDIS_CACHE.set(POSTID, json.dumps(data), ex=60)
         print("adding to cache: ", POSTID)
     return data
