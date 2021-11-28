@@ -59,7 +59,8 @@ var indexXStack = [];
 
 var root_parent = "";
 var parent = "";
-var current_item = "";
+var top_left_post_id = "";
+var bottom_left_post_id = "";
 var kids = [];
 var grandkids = []; // first bottom row's kids
 
@@ -71,7 +72,197 @@ deltaPosY = 0
 var postIndex = 0
 var topPosts = []
 
-var treeHistory = {};
+var treeHistory = [{}];
+
+var i = 0;
+var duration = 750;
+var root;
+
+var treemap = d3.tree()
+  .size([hh, hw]);
+
+  
+  /* Add debugging visualization tree */
+  console.log("Add debugging tree");
+  var svg;
+
+// var diagonal = d3.linkHorizontal()
+//   .projection(function(d) { return [d.x, d.y]; });
+
+var diagonal = function link(d) {
+  return "M" + d.source.x + "," + d.source.y
+      + "C" + (d.source.x + d.target.x) / 2 + "," + d.source.y
+      + " " + (d.source.x + d.target.x) / 2 + "," + d.target.y
+      + " " + d.target.x + "," + d.target.y;
+};
+  
+
+root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
+root.x0 = hh / 2;
+root.y0 = 0;
+  
+// update(root);
+
+d3.select(self.frameElement).style("height", "500px");
+
+function update(source) {
+  console.log("updating the tree from source: ", source, " and root: ", root);
+
+  // Assigns the x and y position for the nodes
+  var treeData = treemap(root);
+
+  console.log("treeData descendents", treeData.descendants());
+  // Compute the new tree layout.
+  var nodes = treeData.descendants(),
+      links = treeData.descendants().slice(1);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d){ d.y = d.depth * 80});
+
+  // ****************** Nodes section ***************************
+
+  // Update the nodes...
+  var node = svg.selectAll('g.node')
+      .data(nodes, function(d) {return d.id || (d.id = ++i); });
+
+  // Enter any new modes at the parent's previous position.
+  var nodeEnter = node.enter().append('g')
+      .attr('class', 'node')
+      .attr("transform", function(d) {
+        return "translate(" + source.x0 + "," + source.y0 + ")";
+    })
+    .on('click', click);
+
+  // Add Circle for the nodes
+  nodeEnter.append('circle')
+      .attr('class', 'node')
+      .attr('id', function(d) { return d.data.name; })
+      .attr('r', 1e-6)
+      .style("fill", function(d) {
+          return d._children ? "lightsteelblue" : "#fff";
+      });
+      // $( "#" + bottom_left_post_id ).css( "fill", "rgb(0,0,0)" );
+
+  // Add labels for the nodes
+  nodeEnter.append('text')
+      .attr("dy", ".35em")
+      .attr("x", function(d) {
+          return d.children || d._children ? -13 : 13;
+      })
+      .attr("text-anchor", function(d) {
+          return d.children || d._children ? "end" : "start";
+      })
+      .text(function(d) { return d.data.name; });
+
+  // UPDATE
+  var nodeUpdate = nodeEnter.merge(node);
+
+  // Transition to the proper position for the node
+  nodeUpdate.transition()
+    .duration(duration)
+    .attr("transform", function(d) { 
+        return "translate(" + d.x + "," + d.y + ")";
+     });
+
+  // Update the node attributes and style
+  nodeUpdate.select('circle.node')
+    .attr('r', 10)
+    .style("fill", function(d) {
+        return d.data.name == bottom_left_post_id ? "#000" : "#fff";
+    })
+    .attr('cursor', 'pointer');
+    // $( "#" + bottom_left_post_id ).css( "fill", "rgb(0,0,0)" );
+
+
+  // Remove any exiting nodes
+  var nodeExit = node.exit().transition()
+      .duration(duration)
+      .attr("transform", function(d) {
+          return "translate(" + source.x + "," + source.y + ")";
+      })
+      .remove();
+
+  // On exit reduce the node circles size to 0
+  nodeExit.select('circle')
+    .attr('r', 1e-6);
+
+  // On exit reduce the opacity of text labels
+  nodeExit.select('text')
+    .style('fill-opacity', 1e-6);
+
+  // ****************** links section ***************************
+
+  // Update the links...
+  var link = svg.selectAll('path.link')
+      .data(links, function(d) { return d.id; });
+
+  // Enter any new links at the parent's previous position.
+  var linkEnter = link.enter().insert('path', "g")
+      .attr("class", "link")
+      .attr("stroke", "black")
+      .style("fill-opacity", 0)
+      .attr('d', function(d){
+        var o = {x: source.x0, y: source.y0}
+        return diagonal(o, o)
+      });
+
+  // UPDATE
+  var linkUpdate = linkEnter.merge(link);
+
+  // Transition back to the parent element position
+  linkUpdate.transition()
+      .duration(duration)
+      .attr('d', function(d){ return diagonal(d, d.parent) })
+      .attr("stroke", "black")
+      .style("fill-opacity", 0);
+      
+
+  // Remove any exiting links
+  var linkExit = link.exit().transition()
+      .duration(duration)
+      .attr('d', function(d) {
+        var o = {x: source.x, y: source.y}
+        return diagonal(o, o)
+      })
+      .attr("stroke", "black")
+      .style("fill-opacity", 0)
+      .remove();
+
+  // Store the old positions for transition.
+  nodes.forEach(function(d){
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+
+  // Creates a curved (diagonal) path from parent to the child nodes
+  function diagonal(s, d) {
+
+    // path = `M ${s.x} ${s.y}
+    //         C ${(s.x + d.x) / 2} ${s.y},
+    //           ${(s.x + d.x) / 2} ${d.y},
+    //           ${d.x} ${d.y}`
+
+    path = "M" + s.x + "," + s.y
+    + "C" + s.x + "," + (s.y + d.y) / 2
+    + " " + d.x + "," +  (s.y + d.y) / 2
+    + " " + d.x + "," + d.y;
+
+    return path
+  }
+
+  // Toggle children on click.
+  function click(event, d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+      } else {
+        d.children = d._children;
+        d._children = null;
+      }
+    update(d);
+  }
+}
+
 
 
 var mod = function(n, m) {
@@ -103,25 +294,26 @@ $(function() {
       topPosts = dataa;
       console.log("data postindex: " + dataa[postIndex])
       root_parent = dataa[postIndex];
-      current_item = root_parent;
-      treeHistory.name = root_parent;
-      treeHistory.parent = null;
+      // root_parent = 29367649;
+      top_left_post_id = root_parent;
+      tempRoot = {"name": root_parent, "parent": null};
+      treeHistory[0] = tempRoot;
       // kids = dataa["kids"];
-      setPostTitle(current_item);
+      setPostTitle(top_left_post_id);
       updateTexts();
+
+      svg = d3.select("body").append("svg")
+      .attr("width", hw)
+      .attr("height", hh)
+      .style("position", "absolute")
+      .style("top", "0px")
+      .style("left", hw + "px")
+      .style("z-index", 100)
+      .append("g")
+      .attr("transform", "translate(" + 0 + "," + hh/2 + ")");
 
       // setPostText(root_parent);
     });
-    /* Add debugging visualization tree */
-    console.log("Add debugging tree");
-    var svg = d3.select("body").append("svg")
-    .attr("width", hw)
-    .attr("height", hh)
-    .style("position", "absolute")
-    .style("top", "0px")
-    .style("left", hw + "px")
-    .append("g")
-    .attr("transform", "translate(" + hw + "," + hh + ")");
 });
 
 function setPostTitle(postID) {
@@ -168,13 +360,16 @@ function setText(postId) {
     .then(data => {
       kids = data["kids"];
       parent = data["parent"];
-      var node = getNodeFromTree(treeHistory, postId);
+      console.log("treeHistory[0]: " + treeHistory[0].name);
+      var node = getNodeFromTree(treeHistory[0], postId);
       console.log(node);
       if (node.children == null) {
         node.children = [];
       }
       for (var i = 0; node && i < kids.length; i++) {
-        node["children"].push({"name" : kids[i], "parent" : postId, "children" : []});        
+        if (getNodeFromTree(node, kids[i]) == null) {
+          node["children"].push({"name" : kids[i], "parent" : postId, "children" : []});        
+      }
       }
       if (indexY == 0) {
         console.log("kids: " + kids);
@@ -215,13 +410,20 @@ function setText(postId) {
         .then(data => {
           // kids = data["kids"];
           console.log("x and Y", indexX, indexY);
-          console.log("dumpy: " + data["id"])
+          console.log("dumpy: " + data["id"]);
+          bottom_left_post_id = data["id"];
           const cardTitleInfo = data["by"] + " " + timeSince(data["time"]);
           console.log("cardTitleInfo: " + cardTitleInfo)
           $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-title').text(cardTitleInfo);
           const httpDecodedCommentText = htmlDecode(data["text"]);
           console.log("httpDecodedCommentText: " + httpDecodedCommentText)
           $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-text').text(httpDecodedCommentText);
+        }).then(() => {
+          console.log("print what the bottom left id is ", bottom_left_post_id);
+          root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
+          root.x0 = hh / 2;
+          root.y0 = 0;
+          update(root);
         })
 
       // lower right
@@ -287,8 +489,8 @@ function getResult(result) {
 
 function updateTexts() {
   // I can only enter here if I'm a legal move
-  setPostTitle(current_item);
-  setText(current_item);
+  setPostTitle(top_left_post_id);
+  setText(top_left_post_id);
 }
 
 function logEverything() {
@@ -297,9 +499,9 @@ function logEverything() {
   console.log("The hidden row: " + getHiddenRowId() + ", hid-y: " + $("#" + getHiddenRowId()).position().top);
   console.log("Ending deltaPosY: " + deltaPosY);
   console.log("current indexX, and indexY", indexX, indexY);
-  console.log("current_item: " + current_item);
+  console.log("current_item: " + top_left_post_id);
   console.log("current_item_kids: " + kids);
-  console.log("treeHistory: " + JSON.stringify(treeHistory));
+  console.log("treeHistory: " + JSON.stringify(treeHistory[0]));
 }
 
 function getTopRowId() {
@@ -340,7 +542,7 @@ function logKey(e) {
       d3.select("#" + getBottomRowId()).transition().duration(400).style("top", () => 2 * hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(0).style("top", () => -hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => 00 + "px")
-      current_item = parent;
+      top_left_post_id = parent;
       indexX = indexXStack.pop();
       indexY -= 1;
     }
@@ -356,8 +558,8 @@ function logKey(e) {
       d3.select("#" + getBottomRowId()).transition().duration(400).style("top", () => 00 + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(0).style("top", () => 2 * hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => hh + "px")
-      parent = current_item;
-      current_item = kids[mod(indexX, kids.length)];
+      parent = top_left_post_id;
+      top_left_post_id = kids[mod(indexX, kids.length)];
       indexXStack.push(indexX);
       indexX = 0;
       indexY += 1;
@@ -428,4 +630,18 @@ function logKey(e) {
   console.log(`${e.code}`);
   updateTexts();
   logEverything();
+
+  
+}
+
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+  d._children = d.children;
+  d.children = null;
+  } else {
+  d.children = d._children;
+  d._children = null;
+  }
+  update(d);
 }
