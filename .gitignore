@@ -137,3 +137,5 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+template/index_attempt_with_niui.html
+template/index_backup.html

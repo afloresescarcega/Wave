@@ -293,8 +293,8 @@ $(function() {
     .then(dataa => {
       topPosts = dataa;
       console.log("data postindex: " + dataa[postIndex])
-      root_parent = dataa[postIndex];
-      // root_parent = 29367649;
+      // root_parent = dataa[postIndex];
+      root_parent = 29500602;
       top_left_post_id = root_parent;
       tempRoot = {"name": root_parent, "parent": null};
       treeHistory[0] = tempRoot;
@@ -310,7 +310,7 @@ $(function() {
       .style("left", hw + "px")
       .style("z-index", 100)
       .append("g")
-      .attr("transform", "translate(" + 0 + "," + hh/2 + ")");
+      .attr("transform", "translate(" + 0 + "," + hh/12 + ")");
 
       // setPostText(root_parent);
     });
@@ -376,7 +376,19 @@ function setText(postId) {
         console.log("This is supposed to be tht title: " + data["title"]);
         $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
         $('#block0col0').children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        const fetchLinkImagePromise = fetch('http://127.0.0.1:5000/wave/api/v1.0/hehe?url=' + encodeURI(data["url"]));
+        fetchLinkImagePromise
+          .then(imageResponse => {
+            return imageResponse.json();
+          }).then(imageData => {
+            console.log("imageData: " + imageData);
+            if (imageData != null) {
+              $('#block0col0').children('.card-img-top').attr("src", imageData);
+            }
+          })
+        // $('#block0col0').children('.card-img-top').attr('src','https://tailwindcss.com/_next/static/media/social-card-large.f6878fd8df804f73ba3f1a271122105a.jpg');
       } else if (indexY >= 1) {
+        $('#block0col0').children('.card-img-top').attr("src", "");
         $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
         $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
       }
@@ -391,7 +403,23 @@ function setText(postId) {
         })
         .then(data => {
           grandkids = data["kids"];
+          var node = getNodeFromTree(treeHistory[0], kids[mod(indexX, kids.length)]);
+          console.log(node);
+          if (node.children == null) {
+            node.children = [];
+          }
+          for (var i = 0; node && i < grandkids.length; i++) {
+            if (getNodeFromTree(node, grandkids[i]) == null) {
+              node["children"].push({"name" : grandkids[i], "parent" : postId, "children" : []});        
+          }
+          }
           console.log("bottom's left's kids: " + grandkids);
+        }).then(() => {
+          console.log("print what the bottom left id is ", bottom_left_post_id);
+          root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
+          root.x0 = hh / 2;
+          root.y0 = 0;
+          update(root);
         })
       }
     }).then(() => {
@@ -435,52 +463,18 @@ function setText(postId) {
           return response.json();
         })
         .then(data => {
-          if(indexX == kids.length) {
+          console.log("lmaoo: ", kids.length);
+          if(indexX == kids.length - 1) {
+            console.log("Add blank to the lower right");
             $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text("");
             $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text("");
           } else {
+            console.log("Filling in the lower right");
             $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
             $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
         }
         })
     })
-
-
-  // upper right
-  // if indexY == 0, show next post title and url
-  // if indexY != 0, set the title with the poster of the sibling comment and time and text
-
-  // if (indexY == 0) {
-  //   console.log("setText: " + postId);
-  // }
-  // else if (indexY >= 1) {
-  //   const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postId + ".json?print=pretty");
-  //   fetchPromise
-  //     .then(response => {return response.json();})
-  //     .then(data => {
-  //       kids = data["kids"];
-  //       const fetchTopRowLeftKidPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + data["kids"][mod(indexX + 0, data["kids"].length)] + ".json?print=pretty");
-  //       fetchTopRowLeftKidPromise
-  //         .then(response => {return response.json();})
-  //         .then(kidData => {
-  //           console.log("This is supposed to be the top left kid text: " + kidData);
-  //           $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text(kidData["by"] + " " + timeSince(kidData["time"]));
-  //           $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(kidData["text"]));
-  //           // $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).append('<p>' + kidData["text"] + '</p>');
-  //         });
-
-  //       // Not title and is top row, right col
-  //       const fetchTopRowRightKidPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + data["kids"][mod(indexX + 1, data["kids"].length)] + ".json?print=pretty");
-  //       fetchTopRowRightKidPromise
-  //         .then(response => {return response.json();})
-  //         .then(kidData => {
-  //           console.log("This is supposed to be the top right kid text: " + kidData["text"]);
-  //           $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text(kidData["by"] + " " + timeSince(kidData["time"]));
-  //           $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(kidData["text"]));
-  //         });
-  //       }
-  //       )
-  // }
 }
 
 function getResult(result) {
@@ -587,7 +581,7 @@ function logKey(e) {
   } else if (e.keyCode == '39') {
     // right arrow
     console.log("This is indexX: " + indexX + " and kids.length: " + kids.length);
-    if(indexX < kids.length) {
+    if(indexX + 1 < kids.length) {
       console.log("Right");
       // const originalXTopLeft = d3.select("#block" + getTopRowId().slice(-1) + getLeftColId()).style("left");
       // const originalXTopRight = d3.select("#block" + getTopRowId().slice(-1) + getRightColId()).style("left");
