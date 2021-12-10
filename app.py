@@ -6,6 +6,8 @@ from flask import jsonify
 import json
 import requests
 import redis
+import metadata_parser
+import urllib.parse
 
 
 
@@ -71,6 +73,20 @@ def get_single_post_data(POSTID, headers):
         REDIS_CACHE.set(POSTID, json.dumps(data), ex=60)
         print("adding to cache: ", POSTID)
     return data
+
+# http://127.0.0.1:5000/wave/api/v1.0/hehe?url=https%3A%2F%2Ftheaviationgeekclub.com%2Fstory-behind-famed-sr-71-blackbird-super-low-knife-edge-pass%2F
+@app.route('/wave/api/v1.0/hehe', methods=['GET'])
+def get_post_image():
+    urll = request.args.get('url', default='*', type=str)
+    print("url: ", urll)
+    print("decoded url: ", urllib.parse.unquote(urll))
+    page = metadata_parser.MetadataParser(url=urllib.parse.unquote(urll))
+    result = page.get_metadata_link('image')
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
+
+
 
 if __name__ == '__main__':
     app.run(host="localhost", port=5000, debug=True)
