@@ -75,7 +75,7 @@ var topPosts = []
 var treeHistory = [{}];
 
 var i = 0;
-var duration = 750;
+var duration = 150;
 var root;
 
 var treemap = d3.tree()
@@ -158,8 +158,7 @@ function update(source) {
   var nodeUpdate = nodeEnter.merge(node);
 
   // Transition to the proper position for the node
-  nodeUpdate.transition()
-    .duration(duration)
+  nodeUpdate
     .attr("transform", function(d) { 
         return "translate(" + d.x + "," + d.y + ")";
      });
@@ -175,8 +174,7 @@ function update(source) {
 
 
   // Remove any exiting nodes
-  var nodeExit = node.exit().transition()
-      .duration(duration)
+  var nodeExit = node.exit()
       .attr("transform", function(d) {
           return "translate(" + source.x + "," + source.y + ")";
       })
@@ -210,16 +208,14 @@ function update(source) {
   var linkUpdate = linkEnter.merge(link);
 
   // Transition back to the parent element position
-  linkUpdate.transition()
-      .duration(duration)
+  linkUpdate
       .attr('d', function(d){ return diagonal(d, d.parent) })
       .attr("stroke", "black")
       .style("fill-opacity", 0);
       
 
   // Remove any exiting links
-  var linkExit = link.exit().transition()
-      .duration(duration)
+  var linkExit = link.exit()
       .attr('d', function(d) {
         var o = {x: source.x, y: source.y}
         return diagonal(o, o)
