@@ -293,9 +293,9 @@ $(function() {
     })
     .then(dataa => {
       topPosts = dataa;
-      console.log("data postindex: " + dataa[postIndex])
-      // root_parent = dataa[postIndex];
-      root_parent = 29500602;
+      console.log("data postindex: " + topPosts[postIndex])
+      root_parent = topPosts[postIndex];
+      // root_parent = 29500602;
       top_left_post_id = root_parent;
       tempRoot = {"name": root_parent, "parent": null};
       treeHistory[0] = tempRoot;
