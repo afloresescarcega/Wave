@@ -139,3 +139,6 @@ dmypy.json
 cython_debug/
 template/index_attempt_with_niui.html
 template/index_backup.html
+
+# will insert into the build context of new installations and therefore cause the custom ip from being generated
+host.props
