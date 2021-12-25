@@ -5,7 +5,12 @@ function htmlDecode(input) {
   return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
 }
 
-host = "http://127.0.0.1:5000/wave/api/v1.0/search?post="
+function getHostAddr() {
+  return hostAddr;
+}
+
+const searchURLPrefix = 'http://' + getHostAddr() + '/wave/api/v1.0/search?post=';
+const openGraphURLPrefix = 'http://' + getHostAddr() + '/wave/api/v1.0/hehe?url=';
 
 function timeSince(epoch) {
   var d = new Date(0);
@@ -317,8 +322,8 @@ function setPostTitle(postID) {
   console.log("postID: " + postID);
   if (indexY == 0) {
     // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
-    console.log("Gonna query: " + host + postID)
-    const fetchPromise = fetch(host + postID);
+    console.log("Gonna query: " + searchURLPrefix + postID)
+    const fetchPromise = fetch(searchURLPrefix + postID);
     fetchPromise
       .then(response => {
         return response.json();
@@ -348,7 +353,7 @@ function setText(postId) {
 
   console.log("setText: " + postId);
   // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postId + ".json?print=pretty");
-  const fetchPromise = fetch(host + postId);
+  const fetchPromise = fetch(searchURLPrefix + postId);
   fetchPromise
     .then(response => {
       return response.json();
@@ -372,7 +377,7 @@ function setText(postId) {
         console.log("This is supposed to be tht title: " + data["title"]);
         $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
         $('#block0col0').children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
-        const fetchLinkImagePromise = fetch('http://127.0.0.1:5000/wave/api/v1.0/hehe?url=' + encodeURI(data["url"]));
+        const fetchLinkImagePromise = fetch(openGraphURLPrefix + encodeURI(data["url"]));
         fetchLinkImagePromise
           .then(imageResponse => {
             return imageResponse.json();
@@ -391,8 +396,8 @@ function setText(postId) {
     }).then(() => {
       // if current item has a kid, save the grandkids
       if (kids.length > 0) {
-        console.log("About to look for grandkids: ", host + kids[mod(indexX, kids.length)])
-        const fetchPromiseLowerLeftsKids = fetch(host + kids[mod(indexX, kids.length)]);
+        console.log("About to look for grandkids: ", searchURLPrefix + kids[mod(indexX, kids.length)])
+        const fetchPromiseLowerLeftsKids = fetch(searchURLPrefix + kids[mod(indexX, kids.length)]);
         fetchPromiseLowerLeftsKids
         .then(response => {
           return response.json();
@@ -426,7 +431,7 @@ function setText(postId) {
       console.log("mod(indexX, kids.length): " + mod(indexX, kids.length));
       console.log("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(indexX, kids.length)] + ".json?print=pretty");
       // const fetchPromiseLowerLeft = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(indexX, kids.length)] + ".json?print=pretty");
-      const fetchPromiseLowerLeft = fetch(host + kids[mod(indexX, kids.length)]);
+      const fetchPromiseLowerLeft = fetch(searchURLPrefix + kids[mod(indexX, kids.length)]);
       fetchPromiseLowerLeft
         .then(response => {
           return response.json();
@@ -453,7 +458,7 @@ function setText(postId) {
       // lower right
       // set the title with the poster of the next child and time and text
       // const fetchPromiseLowerRight = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(indexX + 1, kids.length)] + ".json?print=pretty");
-      const fetchPromiseLowerRight = fetch(host + kids[mod(indexX + 1, kids.length)]);
+      const fetchPromiseLowerRight = fetch(searchURLPrefix + kids[mod(indexX + 1, kids.length)]);
       fetchPromiseLowerRight
         .then(response => {
           return response.json();

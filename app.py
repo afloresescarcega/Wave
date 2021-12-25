@@ -3,17 +3,22 @@ from flask import Flask
 from flask import request
 from flask import Response
 from flask import jsonify
+import configparser
 import json
 import requests
 import redis
 import metadata_parser
+import os
 import urllib.parse
 
 
 
 
+config = configparser.ConfigParser()
+config.read('host.props')
+WAVE_STATIC_URL = config.get('DEFAULT','host')
 app = Flask(__name__, static_folder='static', template_folder='template')
-REDIS_CACHE = redis.Redis(host='localhost', port=6379, db=1)
+REDIS_CACHE = redis.Redis(host='redis', port=6379, db=1)
 
 
 @app.route('/')
@@ -21,7 +26,7 @@ def hello(name=None):
     import os
     print(os.getcwd())
 
-    return render_template('index.html', name=name)
+    return render_template('index.html', name=name, WAVE_STATIC_URL=WAVE_STATIC_URL)
 
 
 @app.route('/wave/api/v1.0/search', methods=['GET'])
@@ -89,4 +94,4 @@ def get_post_image():
 
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=8080, debug=True)
