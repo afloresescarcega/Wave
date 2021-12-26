@@ -71,8 +71,8 @@ var grandkids = []; // first bottom row's kids
 
 var hw = window.innerWidth / 2;
 var hh = window.innerHeight / 2;
-deltaPosX = 0
-deltaPosY = 0
+var deltaPosX = 0;
+var deltaPosY = 0;
 
 var postIndex = 0
 var topPosts = []
@@ -243,7 +243,7 @@ function update(source) {
     //           ${(s.x + d.x) / 2} ${d.y},
     //           ${d.x} ${d.y}`
 
-    path = "M" + s.x + "," + s.y
+    const path = "M" + s.x + "," + s.y
     + "C" + s.x + "," + (s.y + d.y) / 2
     + " " + d.x + "," +  (s.y + d.y) / 2
     + " " + d.x + "," + d.y;
@@ -297,7 +297,7 @@ $(function() {
       root_parent = topPosts[postIndex];
       // root_parent = 29500602;
       top_left_post_id = root_parent;
-      tempRoot = {"name": root_parent, "parent": null};
+      const tempRoot = {"name": root_parent, "parent": null};
       treeHistory[0] = tempRoot;
       // kids = dataa["kids"];
       setPostTitle(top_left_post_id);
@@ -536,7 +536,7 @@ function logKey(e) {
       d3.select("#" + getTopRowId()).transition().duration(400).style("top", () => hh + "px")
       d3.select("#" + getBottomRowId()).transition().duration(400).style("top", () => 2 * hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(0).style("top", () => -hh + "px")
-      d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => 00 + "px")
+      d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => 0 + "px")
       top_left_post_id = parent;
       indexX = indexXStack.pop();
       indexY -= 1;
@@ -550,7 +550,7 @@ function logKey(e) {
       document.getElementById(getBottomRowId()).style.position = "absolute";
       document.getElementById(getHiddenRowId()).style.position = "absolute";
       d3.select("#" + getTopRowId()).transition().duration(400).style("top", () => -hh + "px")
-      d3.select("#" + getBottomRowId()).transition().duration(400).style("top", () => 00 + "px")
+      d3.select("#" + getBottomRowId()).transition().duration(400).style("top", () => 0 + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(0).style("top", () => 2 * hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => hh + "px")
       parent = top_left_post_id;
@@ -574,7 +574,7 @@ function logKey(e) {
       d3.select("#block" + getBottomRowId().slice(-1) + getLeftColId()).transition().duration(400).style("left", () => hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getRightColId()).transition().duration(400).style("left", () => 2 * hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(0).style("left", () => -hw + "px")
-      d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(400).style("left", () => 00 + "px")
+      d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(400).style("left", () => 0 + "px")
 
       indexX -= 1;
       console.log("X: " + indexX + " Y: " + indexY);
@@ -614,7 +614,7 @@ function logKey(e) {
       // d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).style("top", hh + "px");
 
       d3.select("#block" + getBottomRowId().slice(-1) + getLeftColId()).transition().duration(400).style("left", () => -hw + "px")
-      d3.select("#block" + getBottomRowId().slice(-1) + getRightColId()).transition().duration(400).style("left", () => 00 + "px")
+      d3.select("#block" + getBottomRowId().slice(-1) + getRightColId()).transition().duration(400).style("left", () => 0 + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(0).style("left", () => 2 * hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(400).style("left", () => hw + "px")
       indexX += 1;
