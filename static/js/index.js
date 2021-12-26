@@ -300,7 +300,7 @@ $(function() {
       const tempRoot = {"name": root_parent, "parent": null};
       treeHistory[0] = tempRoot;
       // kids = dataa["kids"];
-      setPostTitle(top_left_post_id);
+      setPostTitle(postIndex);
       updateTexts();
 
       svg = d3.select("body").append("svg")
@@ -317,10 +317,12 @@ $(function() {
     });
 });
 
-function setPostTitle(postID) {
+function setPostTitle(postIndex) {
+  var postID = topPosts[postIndex];
   console.log("setPostTitle https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
   console.log("postID: " + postID);
   if (indexY == 0) {
+    // top left
     // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
     console.log("Gonna query: " + searchURLPrefix + postID)
     const fetchPromise = fetch(searchURLPrefix + postID);
@@ -337,9 +339,26 @@ function setPostTitle(postID) {
           parent = root_parent;
         }
         console.log("kids: " + kids);
-        console.log("This is supposed to be tht title: " + data["title"]);
-        $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
-        $('#block0col0').children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        console.log("This is supposed to be the title of top left post: " + data["title"]);
+        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+      })
+
+    console.log("This are the topPosts right before computing the right hand side: " + topPosts);
+    console.log("This is the postIndex: " + postIndex);
+    postID = topPosts[postIndex + 1];
+    // bottom right
+    // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
+    console.log("Gonna query: " + searchURLPrefix + postID)
+    const fetchPromiseSecondPost = fetch(searchURLPrefix + postID);
+    fetchPromiseSecondPost
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log("This is supposed to be the title of top right post: " + data["title"]);
+        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
       })
   }
 }
@@ -484,7 +503,7 @@ function getResult(result) {
 
 function updateTexts() {
   // I can only enter here if I'm a legal move
-  setPostTitle(top_left_post_id);
+  setPostTitle(postIndex);
   setText(top_left_post_id);
 }
 
@@ -527,7 +546,7 @@ function logKey(e) {
   if (e.keyCode == '38') {
     // up arrow
 
-    if (indexY > 0) {
+    if (indexY > -1) {
       console.log("Up");
       deltaPosY += hh;
       document.getElementById(getTopRowId()).style.position = "absolute";
