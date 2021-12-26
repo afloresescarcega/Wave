@@ -314,7 +314,8 @@ $(function() {
       .attr("transform", "translate(" + 0 + "," + hh/12 + ")");
 
       // setPostText(root_parent);
-    });
+    })
+    .then(() => {document.getElementById("row1").addEventListener('scroll', scrollHandler);});
 });
 
 function setPostTitle(postIndex) {
@@ -658,4 +659,15 @@ function click(d) {
   d._children = null;
   }
   update(d);
+}
+
+function scrollHandler(e) {
+  var atSnappingPoint = e.target.scrollLeft % e.target.offsetWidth === 0;
+  var timeOut         = atSnappingPoint ? 0 : 150; //see notes
+
+  clearTimeout(e.target.scrollTimeout);
+  e.target.scrollTimeout = setTimeout(function() {
+      console.log('Scrolling is done!');
+      updateTexts();
+  }, timeOut);
 }
