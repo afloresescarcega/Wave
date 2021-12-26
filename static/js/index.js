@@ -424,7 +424,7 @@ function setText(postId) {
           grandkids = data["kids"];
           var node = getNodeFromTree(treeHistory[0], kids[mod(layoutSingleton.getIndexX() , kids.length)]);
           console.log(node);
-          if (node.children == null) {
+          if (node && node.children == null) {
             node.children = [];
           }
           for (var i = 0; node && i < grandkids.length; i++) {
