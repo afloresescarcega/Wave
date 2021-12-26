@@ -391,7 +391,10 @@ function setText(postId) {
         console.log("This is supposed to be tht title: " + data["title"]);
         $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
         $('#block0col0').children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
-        const fetchLinkImagePromise = fetch(openGraphURLPrefix + encodeURI(data["url"]));
+        if (data["url"]){
+          const imgRequest = openGraphURLPrefix + encodeURIComponent(data["url"]);
+          console.log("imgRequest: " + imgRequest);
+          const fetchLinkImagePromise = fetch(imgRequest);
         fetchLinkImagePromise
           .then(imageResponse => {
             return imageResponse.json();
@@ -400,7 +403,8 @@ function setText(postId) {
             if (imageData != null) {
               $('#block0col0').children('.card-img-top').attr("src", imageData);
             }
-          })
+            });
+        }
         // $('#block0col0').children('.card-img-top').attr('src','https://tailwindcss.com/_next/static/media/social-card-large.f6878fd8df804f73ba3f1a271122105a.jpg');
       } else if (layoutSingleton.getIndexY() >= 1) {
         $('#block0col0').children('.card-img-top').attr("src", "");
