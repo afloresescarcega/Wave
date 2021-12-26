@@ -1,4 +1,5 @@
 import {htmlDecode} from './htmlDecode.js';
+import {layoutSingleton} from './modules/layout.js';
 
 function getHostAddr() {
   return hostAddr;
@@ -53,9 +54,6 @@ function getNodeFromTree(node, name) {
 
 var colors = ["red", "blueviolet", "purple", "blue", "darkcyan", "green", "greenyellow", "yellow", "orange", "orangered"];
 document.addEventListener('keydown', logKey);
-var indexX = 0;
-var indexY = 0;
-var indexXStack = [];
 
 var root_parent = "";
 var parent = "";
@@ -281,6 +279,7 @@ function logPosCol(row = 0) {
 }
 
 $(function() {
+  layoutSingleton.indexXStackPush();
   const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/topstories.json");
   fetchPromise
     .then(response => {
@@ -317,7 +316,7 @@ function setPostTitle(postIndex) {
   var postID = topPosts[postIndex];
   console.log("setPostTitle https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
   console.log("postID: " + postID);
-  if (indexY == 0) {
+  if (layoutSingleton.getIndexY() == 0) {
     // top left
     // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
     console.log("Gonna query: " + searchURLPrefix + postID)
@@ -336,8 +335,8 @@ function setPostTitle(postIndex) {
         }
         console.log("kids: " + kids);
         console.log("This is supposed to be the title of top left post: " + data["title"]);
-        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
-        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
       })
 
     console.log("This are the topPosts right before computing the right hand side: " + topPosts);
@@ -353,18 +352,18 @@ function setPostTitle(postIndex) {
       })
       .then(data => {
         console.log("This is supposed to be the title of top right post: " + data["title"]);
-        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
-        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
       })
   }
 }
 
 function setText(postId) {
   // upper left
-  // if indexY == 0, do nothing beccause setPostTitle got it
-  // if indexY != 0, set title with poster and time and text
-  console.log("indexY: " + indexY);
-  console.log("indexX: " + indexX);
+  // if layoutSingleton.getIndexY() == 0, do nothing beccause setPostTitle got it
+  // if layoutSingleton.getIndexY() != 0, set title with poster and time and text
+  console.log("layoutSingleton.getIndexY() : " + layoutSingleton.getIndexY() );
+  console.log("layoutSingleton.getIndexX() : " + layoutSingleton.getIndexX() );
 
   console.log("setText: " + postId);
   // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postId + ".json?print=pretty");
@@ -387,7 +386,7 @@ function setText(postId) {
           node["children"].push({"name" : kids[i], "parent" : postId, "children" : []});        
       }
       }
-      if (indexY == 0) {
+      if (layoutSingleton.getIndexY() == 0) {
         console.log("kids: " + kids);
         console.log("This is supposed to be tht title: " + data["title"]);
         $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
@@ -403,23 +402,23 @@ function setText(postId) {
             }
           })
         // $('#block0col0').children('.card-img-top').attr('src','https://tailwindcss.com/_next/static/media/social-card-large.f6878fd8df804f73ba3f1a271122105a.jpg');
-      } else if (indexY >= 1) {
+      } else if (layoutSingleton.getIndexY() >= 1) {
         $('#block0col0').children('.card-img-top').attr("src", "");
-        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
-        $("#block" + mod(indexY + 0, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
+        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
+        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
       }
     }).then(() => {
       // if current item has a kid, save the grandkids
       if (kids.length > 0) {
-        console.log("About to look for grandkids: ", searchURLPrefix + kids[mod(indexX, kids.length)])
-        const fetchPromiseLowerLeftsKids = fetch(searchURLPrefix + kids[mod(indexX, kids.length)]);
+        console.log("About to look for grandkids: ", searchURLPrefix + kids[mod(layoutSingleton.getIndexX() , kids.length)])
+        const fetchPromiseLowerLeftsKids = fetch(searchURLPrefix + kids[mod(layoutSingleton.getIndexX() , kids.length)]);
         fetchPromiseLowerLeftsKids
         .then(response => {
           return response.json();
         })
         .then(data => {
           grandkids = data["kids"];
-          var node = getNodeFromTree(treeHistory[0], kids[mod(indexX, kids.length)]);
+          var node = getNodeFromTree(treeHistory[0], kids[mod(layoutSingleton.getIndexX() , kids.length)]);
           console.log(node);
           if (node.children == null) {
             node.children = [];
@@ -442,26 +441,26 @@ function setText(postId) {
       // lower left
       // set the title with the poster of the first child and time and text
       console.log("kids: " + kids);
-      console.log("indexX: " + indexX);
-      console.log("mod(indexX, kids.length): " + mod(indexX, kids.length));
-      console.log("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(indexX, kids.length)] + ".json?print=pretty");
-      // const fetchPromiseLowerLeft = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(indexX, kids.length)] + ".json?print=pretty");
-      const fetchPromiseLowerLeft = fetch(searchURLPrefix + kids[mod(indexX, kids.length)]);
+      console.log("layoutSingleton.getIndexX() : " + layoutSingleton.getIndexX() );
+      console.log("mod(layoutSingleton.getIndexX() , kids.length): " + mod(layoutSingleton.getIndexX() , kids.length));
+      console.log("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() , kids.length)] + ".json?print=pretty");
+      // const fetchPromiseLowerLeft = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() , kids.length)] + ".json?print=pretty");
+      const fetchPromiseLowerLeft = fetch(searchURLPrefix + kids[mod(layoutSingleton.getIndexX() , kids.length)]);
       fetchPromiseLowerLeft
         .then(response => {
           return response.json();
         })
         .then(data => {
           // kids = data["kids"];
-          console.log("x and Y", indexX, indexY);
+          console.log("x and Y", layoutSingleton.getIndexX() , layoutSingleton.getIndexY() );
           console.log("dumpy: " + data["id"]);
           bottom_left_post_id = data["id"];
           const cardTitleInfo = data["by"] + " " + timeSince(data["time"]);
           console.log("cardTitleInfo: " + cardTitleInfo)
-          $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-title').text(cardTitleInfo);
+          $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-title').text(cardTitleInfo);
           const httpDecodedCommentText = htmlDecode(data["text"]);
           console.log("httpDecodedCommentText: " + httpDecodedCommentText)
-          $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 0, 3)).children('.card-body').children('.card-text').text(httpDecodedCommentText);
+          $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-text').text(httpDecodedCommentText);
         }).then(() => {
           console.log("print what the bottom left id is ", bottom_left_post_id);
           root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
@@ -472,22 +471,22 @@ function setText(postId) {
 
       // lower right
       // set the title with the poster of the next child and time and text
-      // const fetchPromiseLowerRight = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(indexX + 1, kids.length)] + ".json?print=pretty");
-      const fetchPromiseLowerRight = fetch(searchURLPrefix + kids[mod(indexX + 1, kids.length)]);
+      // const fetchPromiseLowerRight = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() + 1, kids.length)] + ".json?print=pretty");
+      const fetchPromiseLowerRight = fetch(searchURLPrefix + kids[mod(layoutSingleton.getIndexX() + 1, kids.length)]);
       fetchPromiseLowerRight
         .then(response => {
           return response.json();
         })
         .then(data => {
           console.log("lmaoo: ", kids.length);
-          if(indexX == kids.length - 1) {
+          if(layoutSingleton.getIndexX() == kids.length - 1) {
             console.log("Add blank to the lower right");
-            $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text("");
-            $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text("");
+            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-title').text("");
+            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-text').text("");
           } else {
             console.log("Filling in the lower right");
-            $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
-            $("#block" + mod(indexY + 1, 3) + "col" + mod(indexX + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
+            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
+            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
         }
         })
     })
@@ -508,41 +507,41 @@ function logEverything() {
   console.log("The bottom row: " + getBottomRowId() + ", bot-y: " + $("#" + getBottomRowId()).position().top);
   console.log("The hidden row: " + getHiddenRowId() + ", hid-y: " + $("#" + getHiddenRowId()).position().top);
   console.log("Ending deltaPosY: " + deltaPosY);
-  console.log("current indexX, and indexY", indexX, indexY);
+  console.log("current layoutSingleton.getIndexX() , and layoutSingleton.getIndexY() ", layoutSingleton.getIndexX() , layoutSingleton.getIndexY() );
   console.log("current_item: " + top_left_post_id);
   console.log("current_item_kids: " + kids);
   console.log("treeHistory: " + JSON.stringify(treeHistory[0]));
 }
 
 function getTopRowId() {
-  return "row" + mod(indexY + 0, 3);
+  return "row" + mod(layoutSingleton.getIndexY() + 0, 3);
 }
 
 function getBottomRowId() {
-  return "row" + mod(indexY + 1, 3);
+  return "row" + mod(layoutSingleton.getIndexY() + 1, 3);
 }
 
 function getHiddenRowId() {
-  return "row" + mod(indexY + 2, 3);
+  return "row" + mod(layoutSingleton.getIndexY() + 2, 3);
 }
 
 function getLeftColId() {
-  return "col" + mod(indexX + 0, 3);
+  return "col" + mod(layoutSingleton.getIndexX() + 0, 3);
 }
 
 function getRightColId() {
-  return "col" + mod(indexX + 1, 3);
+  return "col" + mod(layoutSingleton.getIndexX() + 1, 3);
 }
 
 function getHiddendColId() {
-  return "col" + mod(indexX + 2, 3);
+  return "col" + mod(layoutSingleton.getIndexX() + 2, 3);
 }
 
 function logKey(e) {
   if (e.keyCode == '38') {
     // up arrow
 
-    if (indexY > -1) {
+    if (layoutSingleton.getIndexY() > -1) {
       console.log("Up");
       deltaPosY += hh;
       document.getElementById(getTopRowId()).style.position = "absolute";
@@ -553,8 +552,8 @@ function logKey(e) {
       d3.select("#" + getHiddenRowId()).transition().duration(0).style("top", () => -hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => 0 + "px")
       top_left_post_id = parent;
-      indexX = indexXStack.pop();
-      indexY -= 1;
+      layoutSingleton.indexXStackPop();
+      layoutSingleton.indexYDec();
     }
   } else if (e.keyCode == '40') {
     // down arrow
@@ -569,52 +568,52 @@ function logKey(e) {
       d3.select("#" + getHiddenRowId()).transition().duration(0).style("top", () => 2 * hh + "px")
       d3.select("#" + getHiddenRowId()).transition().duration(400).style("top", () => hh + "px")
       parent = top_left_post_id;
-      top_left_post_id = kids[mod(indexX, kids.length)];
-      indexXStack.push(indexX);
-      indexX = 0;
-      indexY += 1;
+      top_left_post_id = kids[mod(layoutSingleton.getIndexX() , kids.length)];
+      layoutSingleton.indexXStackPush();
+      layoutSingleton.indexXReset();
+      layoutSingleton.indexYInc();
     }
   } else if (e.keyCode == '37') {
-    if (indexX > 0) { // left arrow
+    if (layoutSingleton.getIndexX() > 0) { // left arrow
       console.log("Left");
-      // document.getElementById("block" + mod(indexY + 1, 3) + getLeftColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getRightColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getHiddendColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getLeftColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getRightColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getHiddendColId()).style.position = "absolute";
       
       // set the tops to be the same, if you don't move down first you can't move right *shrug*
-      // document.getElementById("block" + mod(indexY + 1, 3) + getLeftColId()).style.top = hh + "px";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getRightColId()).style.top = hh + "px";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getHiddendColId()).style.top = hh + "px";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getLeftColId()).style.top = hh + "px";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getRightColId()).style.top = hh + "px";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getHiddendColId()).style.top = hh + "px";
 
       d3.select("#block" + getBottomRowId().slice(-1) + getLeftColId()).transition().duration(400).style("left", () => hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getRightColId()).transition().duration(400).style("left", () => 2 * hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(0).style("left", () => -hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(400).style("left", () => 0 + "px")
 
-      indexX -= 1;
-      console.log("X: " + indexX + " Y: " + indexY);
+      layoutSingleton.indexXDec();
+      console.log("X: " + layoutSingleton.getIndexX() + " Y: " + layoutSingleton.getIndexY() );
     }
   } else if (e.keyCode == '39') {
     // right arrow
-    console.log("This is indexX: " + indexX + " and kids.length: " + kids.length);
-    if(indexX + 1 < kids.length) {
+    console.log("This is layoutSingleton.getIndexX() : " + layoutSingleton.getIndexX() + " and kids.length: " + kids.length);
+    if(layoutSingleton.getIndexX() + 1 < kids.length) {
       console.log("Right");
       // const originalXTopLeft = d3.select("#block" + getTopRowId().slice(-1) + getLeftColId()).style("left");
       // const originalXTopRight = d3.select("#block" + getTopRowId().slice(-1) + getRightColId()).style("left");
       // const originalXTopHidden = d3.select("#block" + getTopRowId().slice(-1) + getHiddendColId()).style("left");
 
-      // document.getElementById("block" + mod(indexY + 0, 3) + getLeftColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 0, 3) + getRightColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 0, 3) + getHiddendColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getLeftColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getRightColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 1, 3) + getHiddendColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 2, 3) + getLeftColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 2, 3) + getRightColId()).style.position = "absolute";
-      // document.getElementById("block" + mod(indexY + 2, 3) + getHiddendColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 0, 3) + getLeftColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 0, 3) + getRightColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 0, 3) + getHiddendColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getLeftColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getRightColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getHiddendColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 2, 3) + getLeftColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 2, 3) + getRightColId()).style.position = "absolute";
+      // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 2, 3) + getHiddendColId()).style.position = "absolute";
 
       // set the tops to be the same, if you don't move down first you can't move right *shrug*
-      console.log("what I'm selecting when going right: ", "block" + mod(indexY + 1, 3) + getLeftColId());
+      console.log("what I'm selecting when going right: ", "block" + mod(layoutSingleton.getIndexY() + 1, 3) + getLeftColId());
 
       // d3.select("#block" + getTopRowId().slice(-1) + getLeftColId()).style("top", 00 + "px");
       // d3.select("#block" + getTopRowId().slice(-1) + getRightColId()).style("top", 00 + "px");
@@ -632,9 +631,9 @@ function logKey(e) {
       d3.select("#block" + getBottomRowId().slice(-1) + getRightColId()).transition().duration(400).style("left", () => 0 + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(0).style("left", () => 2 * hw + "px")
       d3.select("#block" + getBottomRowId().slice(-1) + getHiddendColId()).transition().duration(400).style("left", () => hw + "px")
-      indexX += 1;
+      layoutSingleton.indexXInc();
       // current_item = kids[mod(indexX, kids.length)];
-      console.log("X: " + indexX + " Y: " + indexY);
+      console.log("X: " + layoutSingleton.getIndexX() + " Y: " + layoutSingleton.getIndexY() );
     }
   }
   console.log(`${e.code}`);
