@@ -1,3 +1,5 @@
+import { mod } from './mod.js';
+
 export var layoutSingleton = (function() {
   var indexX = 0;
   var indexY = 0;
@@ -39,6 +41,18 @@ export var layoutSingleton = (function() {
     getIndexY: function() {
       console.log("Retrieving indexY: " + indexY);
       return indexY;
+    },
+    getTopLeftElement: function() {
+      return $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3));
+    },
+    getTopRightElement: function() {
+      return $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3))
+    },
+    getBottomLeftElement: function() {
+      return $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3));
+    },
+    getBottomRightElement: function() {
+      return $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3));
     }
   };
 })();
