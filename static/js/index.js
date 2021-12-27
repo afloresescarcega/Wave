@@ -542,7 +542,7 @@ function getHiddendColId() {
 }
 
 function logKey(e) {
-  if (e.keyCode == '38') {
+  if (e.code === 'KeyW') {
     // up arrow
 
     if (layoutSingleton.getIndexY() > -1) {
@@ -558,8 +558,11 @@ function logKey(e) {
       top_left_post_id = parent;
       layoutSingleton.indexXStackPop();
       layoutSingleton.indexYDec();
+      console.log(`${e.code}`);
+      updateTexts();
+      logEverything();
     }
-  } else if (e.keyCode == '40') {
+  } else if (e.code === 'KeyS') {
     // down arrow
     // only if there are kids
     if (typeof kids !== "undefined" && kids.length > 0 && grandkids.length != 0) {
@@ -576,8 +579,11 @@ function logKey(e) {
       layoutSingleton.indexXStackPush();
       layoutSingleton.indexXReset();
       layoutSingleton.indexYInc();
+      console.log(`${e.code}`);
+      updateTexts();
+      logEverything();
     }
-  } else if (e.keyCode == '37') {
+  } else if (e.code === 'KeyA') {
     if (layoutSingleton.getIndexX() > 0) { // left arrow
       console.log("Left");
       // document.getElementById("block" + mod(layoutSingleton.getIndexY() + 1, 3) + getLeftColId()).style.position = "absolute";
@@ -596,8 +602,11 @@ function logKey(e) {
 
       layoutSingleton.indexXDec();
       console.log("X: " + layoutSingleton.getIndexX() + " Y: " + layoutSingleton.getIndexY() );
+      console.log(`${e.code}`);
+      updateTexts();
+      logEverything();
     }
-  } else if (e.keyCode == '39') {
+  } else if (e.code === 'KeyD') {
     // right arrow
     console.log("This is layoutSingleton.getIndexX() : " + layoutSingleton.getIndexX() + " and kids.length: " + kids.length);
     if(layoutSingleton.getIndexX() + 1 < kids.length) {
@@ -638,13 +647,11 @@ function logKey(e) {
       layoutSingleton.indexXInc();
       // current_item = kids[mod(indexX, kids.length)];
       console.log("X: " + layoutSingleton.getIndexX() + " Y: " + layoutSingleton.getIndexY() );
-    }
-  }
   console.log(`${e.code}`);
   updateTexts();
   logEverything();
-
-  
+    }
+  }
 }
 
 // Toggle children on click.
