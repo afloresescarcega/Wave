@@ -1,4 +1,5 @@
 import {htmlDecode} from './htmlDecode.js';
+import { mod } from './modules/mod.js';
 import {layoutSingleton} from './modules/layout.js';
 
 function getHostAddr() {
@@ -259,11 +260,6 @@ function update(source) {
 
 
 
-var mod = function(n, m) {
-  var remain = n % m;
-  return Math.floor(remain >= 0 ? remain : remain + m);
-};
-
 function logPos() {
   console.log(root_parent);
   console.log(kids);
@@ -335,8 +331,8 @@ function setPostTitle(postIndex) {
         }
         console.log("kids: " + kids);
         console.log("This is supposed to be the title of top left post: " + data["title"]);
-        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
-        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
       })
 
     console.log("This are the topPosts right before computing the right hand side: " + topPosts);
@@ -352,8 +348,8 @@ function setPostTitle(postIndex) {
       })
       .then(data => {
         console.log("This is supposed to be the title of top right post: " + data["title"]);
-        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
-        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        layoutSingleton.getTopRightElement().children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        layoutSingleton.getTopRightElement().children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
       })
   }
 }
@@ -408,8 +404,8 @@ function setText(postId) {
         // $('#block0col0').children('.card-img-top').attr('src','https://tailwindcss.com/_next/static/media/social-card-large.f6878fd8df804f73ba3f1a271122105a.jpg');
       } else if (layoutSingleton.getIndexY() >= 1) {
         $('#block0col0').children('.card-img-top').attr("src", "");
-        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
-        $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
       }
     }).then(() => {
       // if current item has a kid, save the grandkids
@@ -461,10 +457,10 @@ function setText(postId) {
           bottom_left_post_id = data["id"];
           const cardTitleInfo = data["by"] + " " + timeSince(data["time"]);
           console.log("cardTitleInfo: " + cardTitleInfo)
-          $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-title').text(cardTitleInfo);
+          layoutSingleton.getBottomLeftElement().children('.card-body').children('.card-title').text(cardTitleInfo);
           const httpDecodedCommentText = htmlDecode(data["text"]);
           console.log("httpDecodedCommentText: " + httpDecodedCommentText)
-          $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3)).children('.card-body').children('.card-text').text(httpDecodedCommentText);
+          layoutSingleton.getBottomLeftElement().children('.card-body').children('.card-text').text(httpDecodedCommentText);
         }).then(() => {
           console.log("print what the bottom left id is ", bottom_left_post_id);
           root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
@@ -485,12 +481,12 @@ function setText(postId) {
           console.log("lmaoo: ", kids.length);
           if(layoutSingleton.getIndexX() == kids.length - 1) {
             console.log("Add blank to the lower right");
-            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-title').text("");
-            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-text').text("");
+            layoutSingleton.getBottomRightElement().children('.card-body').children('.card-title').text("");
+            layoutSingleton.getBottomRightElement().children('.card-body').children('.card-text').text("");
           } else {
             console.log("Filling in the lower right");
-            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
-            $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3)).children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
+            layoutSingleton.getBottomRightElement().children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
+            layoutSingleton.getBottomRightElement().children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
         }
         })
     })
@@ -502,6 +498,14 @@ function getResult(result) {
 
 function updateTexts() {
   // I can only enter here if I'm a legal move
+  // did the bottom row move?
+  if(layoutSingleton.getBottomLeftElement().position().left < 0){
+    // moved left
+    layoutSingleton.indexXInc();
+  } else if (layoutSingleton.getBottomRightElement().position().left >= 2*hh) {
+    // moved right
+    layoutSingleton.indexXDec();
+  }
   setPostTitle(postIndex);
   setText(top_left_post_id);
 }
