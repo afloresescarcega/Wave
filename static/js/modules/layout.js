@@ -4,6 +4,16 @@ export var layoutSingleton = (function() {
   var indexX = 0;
   var indexY = 0;
   var indexXStack = [];
+  var kids = [];
+
+  function getIndexX() {
+    console.log("Retrieving indexX: " + indexX);
+    return indexX;
+  }
+  function getIndexY() {
+    console.log("Retrieving indexY: " + indexY);
+    return indexY;
+  }
 
   return {
     indexXStackPop: function() {
@@ -34,25 +44,41 @@ export var layoutSingleton = (function() {
       console.log('Resetting indexX to: ' + indexX);
       indexX = 0;
     },
-    getIndexX: function() {
-      console.log("Retrieving indexX: " + indexX);
-      return indexX;
-    },
-    getIndexY: function() {
-      console.log("Retrieving indexY: " + indexY);
-      return indexY;
-    },
     getTopLeftElement: function() {
-      return $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3));
+      return $("#block" + mod(getIndexY() + 0, 3) + "col" + mod(getIndexX() + 0, 3));
     },
     getTopRightElement: function() {
-      return $("#block" + mod(layoutSingleton.getIndexY() + 0, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3))
+      return $("#block" + mod(getIndexY() + 0, 3) + "col" + mod(getIndexX() + 1, 3))
     },
     getBottomLeftElement: function() {
-      return $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 0, 3));
+      return $("#block" + mod(getIndexY() + 1, 3) + "col" + mod(getIndexX() + 0, 3));
     },
     getBottomRightElement: function() {
-      return $("#block" + mod(layoutSingleton.getIndexY() + 1, 3) + "col" + mod(layoutSingleton.getIndexX() + 1, 3));
+      return $("#block" + mod(getIndexY() + 1, 3) + "col" + mod(getIndexX() + 1, 3));
+    },
+    isPostInTopRow: function() {
+      return getIndexY() === 0;
+    },
+    isPostHidden: function() {
+      return getIndexY() >= 1;
+    },
+    isThereNoPostInBottomRight: function() {
+      return getIndexX() == kids.length - 1;
+    },
+    getPostKids: function() {
+      if (kids.length === 0) {
+        throw new Error("kids is empty");
+      }
+      return kids;
+    },
+    setPostKids: function(newKids) {
+      kids = newKids;
+    },
+    getLowerLeftPostId: function() {
+      return kids[mod(getIndexX() , kids.length)];
+    },
+    getLowerRightPostId: function() {
+      return kids[mod(getIndexX() + 1, kids.length)];
     }
   };
 })();
