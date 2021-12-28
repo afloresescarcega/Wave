@@ -60,8 +60,7 @@ var root_parent = "";
 var parent = "";
 var top_left_post_id = "";
 var bottom_left_post_id = "";
-var kids = [];
-var grandkids = []; // first bottom row's kids
+var grandchildren = []; // first bottom row's children
 
 var hw = window.innerWidth / 2;
 var hh = window.innerHeight / 2;
@@ -262,7 +261,6 @@ function update(source) {
 
 function logPos() {
   console.log(root_parent);
-  console.log(kids);
   console.log("row0 y: " + document.getElementById("row0").getBoundingClientRect().y);
   console.log("row1 y: " + document.getElementById("row1").getBoundingClientRect().y);
   console.log("row2 y: " + document.getElementById("row2").getBoundingClientRect().y);
@@ -289,8 +287,6 @@ $(function() {
       top_left_post_id = root_parent;
       const tempRoot = {"name": root_parent, "parent": null};
       treeHistory[0] = tempRoot;
-      // kids = dataa["kids"];
-      setPostTitle(postIndex);
       updateTexts();
 
       svg = d3.select("body").append("svg")
@@ -312,7 +308,7 @@ function setPostTitle(postIndex) {
   var postID = topPosts[postIndex];
   console.log("setPostTitle https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
   console.log("postID: " + postID);
-  if (layoutSingleton.getIndexY() == 0) {
+  if (layoutSingleton.isPostInTopRow()) {
     // top left
     // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
     console.log("Gonna query: " + searchURLPrefix + postID)
@@ -322,14 +318,12 @@ function setPostTitle(postIndex) {
         return response.json();
       })
       .then(data => {
-        kids = data["kids"];
         // for each kid, get the title
         if ('key' in data) {
           parent = data["parent"];
         } else {
           parent = root_parent;
         }
-        console.log("kids: " + kids);
         console.log("This is supposed to be the title of top left post: " + data["title"]);
         layoutSingleton.getTopLeftElement().children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
         layoutSingleton.getTopLeftElement().children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
@@ -356,10 +350,6 @@ function setPostTitle(postIndex) {
 
 function setText(postId) {
   // upper left
-  // if layoutSingleton.getIndexY() == 0, do nothing beccause setPostTitle got it
-  // if layoutSingleton.getIndexY() != 0, set title with poster and time and text
-  console.log("layoutSingleton.getIndexY() : " + layoutSingleton.getIndexY() );
-  console.log("layoutSingleton.getIndexX() : " + layoutSingleton.getIndexX() );
 
   console.log("setText: " + postId);
   // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postId + ".json?print=pretty");
@@ -369,7 +359,7 @@ function setText(postId) {
       return response.json();
     })
     .then(data => {
-      kids = data["kids"];
+      layoutSingleton.setPostKids(data["kids"]);
       parent = data["parent"];
       console.log("treeHistory[0]: " + treeHistory[0].name);
       var node = getNodeFromTree(treeHistory[0], postId);
@@ -377,13 +367,13 @@ function setText(postId) {
       if (node.children == null) {
         node.children = [];
       }
-      for (var i = 0; node && i < kids.length; i++) {
-        if (getNodeFromTree(node, kids[i]) == null) {
-          node["children"].push({"name" : kids[i], "parent" : postId, "children" : []});        
+      for (var i = 0; node && i < layoutSingleton.getPostKids().length; i++) {
+        if (getNodeFromTree(node, layoutSingleton.getPostKids()[i]) == null) {
+          node["children"].push({"name" : layoutSingleton.getPostKids()[i], "parent" : postId, "children" : []});        
       }
       }
-      if (layoutSingleton.getIndexY() == 0) {
-        console.log("kids: " + kids);
+      if (layoutSingleton.isPostInTopRow()) {
+        console.log("kids: " + layoutSingleton.getPostKids());
         console.log("This is supposed to be tht title: " + data["title"]);
         $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
         $('#block0col0').children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
@@ -402,33 +392,33 @@ function setText(postId) {
             });
         }
         // $('#block0col0').children('.card-img-top').attr('src','https://tailwindcss.com/_next/static/media/social-card-large.f6878fd8df804f73ba3f1a271122105a.jpg');
-      } else if (layoutSingleton.getIndexY() >= 1) {
+      } else if (layoutSingleton.isPostHidden()) {
         $('#block0col0').children('.card-img-top').attr("src", "");
         layoutSingleton.getTopLeftElement().children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
         layoutSingleton.getTopLeftElement().children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
       }
     }).then(() => {
       // if current item has a kid, save the grandkids
-      if (kids.length > 0) {
-        console.log("About to look for grandkids: ", searchURLPrefix + kids[mod(layoutSingleton.getIndexX() , kids.length)])
-        const fetchPromiseLowerLeftsKids = fetch(searchURLPrefix + kids[mod(layoutSingleton.getIndexX() , kids.length)]);
+      if (layoutSingleton.getPostKids().length > 0) {
+        console.log("About to look for grandkids: ", searchURLPrefix + layoutSingleton.getLowerLeftPostId())
+        const fetchPromiseLowerLeftsKids = fetch(searchURLPrefix + layoutSingleton.getLowerLeftPostId());
         fetchPromiseLowerLeftsKids
         .then(response => {
           return response.json();
         })
         .then(data => {
-          grandkids = data["kids"];
-          var node = getNodeFromTree(treeHistory[0], kids[mod(layoutSingleton.getIndexX() , kids.length)]);
+          grandchildren = data["kids"];
+          var node = getNodeFromTree(treeHistory[0], layoutSingleton.getLowerLeftPostId());
           console.log(node);
           if (node && node.children == null) {
             node.children = [];
           }
-          for (var i = 0; node && i < grandkids.length; i++) {
-            if (getNodeFromTree(node, grandkids[i]) == null) {
-              node["children"].push({"name" : grandkids[i], "parent" : postId, "children" : []});        
+          for (var i = 0; node && i < grandchildren.length; i++) {
+            if (getNodeFromTree(node, grandchildren[i]) == null) {
+              node["children"].push({"name" : grandchildren[i], "parent" : postId, "children" : []});        
           }
           }
-          console.log("bottom's left's kids: " + grandkids);
+          console.log("bottom's left's kids: " + grandchildren);
         }).then(() => {
           console.log("print what the bottom left id is ", bottom_left_post_id);
           root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
@@ -440,19 +430,16 @@ function setText(postId) {
     }).then(() => {
       // lower left
       // set the title with the poster of the first child and time and text
-      console.log("kids: " + kids);
-      console.log("layoutSingleton.getIndexX() : " + layoutSingleton.getIndexX() );
-      console.log("mod(layoutSingleton.getIndexX() , kids.length): " + mod(layoutSingleton.getIndexX() , kids.length));
-      console.log("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() , kids.length)] + ".json?print=pretty");
-      // const fetchPromiseLowerLeft = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() , kids.length)] + ".json?print=pretty");
-      const fetchPromiseLowerLeft = fetch(searchURLPrefix + kids[mod(layoutSingleton.getIndexX() , kids.length)]);
+      console.log("kids: " + layoutSingleton.getPostKids());
+      console.log("https://hacker-news.firebaseio.com/v0/item/" + layoutSingleton.getLowerLeftPostId() + ".json?print=pretty");
+      // const fetchPromiseLowerLeft = fetch("https://hacker-news.firebaseio.com/v0/item/" + layoutSingleton.getLowerLeftPostId() + ".json?print=pretty");
+      const fetchPromiseLowerLeft = fetch(searchURLPrefix + layoutSingleton.getLowerLeftPostId());
       fetchPromiseLowerLeft
         .then(response => {
           return response.json();
         })
         .then(data => {
           // kids = data["kids"];
-          console.log("x and Y", layoutSingleton.getIndexX() , layoutSingleton.getIndexY() );
           console.log("dumpy: " + data["id"]);
           bottom_left_post_id = data["id"];
           const cardTitleInfo = data["by"] + " " + timeSince(data["time"]);
@@ -472,14 +459,14 @@ function setText(postId) {
       // lower right
       // set the title with the poster of the next child and time and text
       // const fetchPromiseLowerRight = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() + 1, kids.length)] + ".json?print=pretty");
-      const fetchPromiseLowerRight = fetch(searchURLPrefix + kids[mod(layoutSingleton.getIndexX() + 1, kids.length)]);
+      const fetchPromiseLowerRight = fetch(searchURLPrefix + layoutSingleton.getLowerRightPostId());
       fetchPromiseLowerRight
         .then(response => {
           return response.json();
         })
         .then(data => {
-          console.log("lmaoo: ", kids.length);
-          if(layoutSingleton.getIndexX() == kids.length - 1) {
+          console.log("lmaoo: ", layoutSingleton.getPostKids().length);
+          if(layoutSingleton.isThereNoPostInBottomRight()) {
             console.log("Add blank to the lower right");
             layoutSingleton.getBottomRightElement().children('.card-body').children('.card-title').text("");
             layoutSingleton.getBottomRightElement().children('.card-body').children('.card-text').text("");
