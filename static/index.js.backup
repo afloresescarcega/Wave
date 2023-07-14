@@ -1,0 +1,451 @@
+import {htmlDecode} from './htmlDecode.js';
+import {layoutSingleton} from './modules/layout.js';
+import {timeSince} from "./modules/timeSince.js";
+
+function getHostAddr() {
+  return hostAddr;
+}
+
+const searchURLPrefix = 'http://' + getHostAddr() + '/wave/api/v1.0/search?post=';
+const openGraphURLPrefix = 'http://' + getHostAddr() + '/wave/api/v1.0/hehe?url=';
+
+function getNodeFromTree(node, name) {
+  if (node.name == name) {
+    console.log("got node: " + node.name);
+    return node;
+  } else if (node.children != null) {
+    var result = null;
+    for (let i = 0; result == null && i < node.children.length; i++) {
+      result = getNodeFromTree(node.children[i], name);
+    }
+    console.log("result: " + result);
+    return result;
+  }
+  console.log("getnode returned null");
+  return null;
+}
+
+var colors = ["red", "blueviolet", "purple", "blue", "darkcyan", "green", "greenyellow", "yellow", "orange", "orangered"];
+
+var root_parent = "";
+var parent = "";
+var top_left_post_id = "";
+var bottom_left_post_id = "";
+var grandchildren = []; // first bottom row's children
+
+var hw = window.innerWidth / 2;
+var hh = window.innerHeight / 2;
+var deltaPosX = 0;
+var deltaPosY = 0;
+
+var postIndex = 0
+var topPosts = []
+
+var treeHistory = [{}];
+
+var i = 0;
+var duration = 150;
+var root;
+
+var treemap = d3.tree()
+  .size([hh, hw]);
+
+
+/* Add debugging visualization tree */
+console.log("Add debugging tree");
+var svg;
+
+
+
+var diagonal = function link(d) {
+  return "M" + d.source.x + "," + d.source.y
+    + "C" + (d.source.x + d.target.x) / 2 + "," + d.source.y
+    + " " + (d.source.x + d.target.x) / 2 + "," + d.target.y
+    + " " + d.target.x + "," + d.target.y;
+};
+
+
+root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
+root.x0 = hh / 2;
+root.y0 = 0;
+
+
+d3.select(self.frameElement).style("height", "500px");
+
+function update(source) {
+  console.log("updating the tree from source: ", source, " and root: ", root);
+
+  // Assigns the x and y position for the nodes
+  var treeData = treemap(root);
+
+  console.log("treeData descendents", treeData.descendants());
+  // Compute the new tree layout.
+  var nodes = treeData.descendants(),
+    links = treeData.descendants().slice(1);
+
+  // Normalize for fixed-depth.
+  nodes.forEach(function(d){ d.y = d.depth * 80});
+
+  // ****************** Nodes section ***************************
+
+  // Update the nodes...
+  var node = svg.selectAll('g.node')
+    .data(nodes, function(d) {return d.id || (d.id = ++i); });
+
+  // Enter any new modes at the parent's previous position.
+  var nodeEnter = node.enter().append('g')
+    .attr('class', 'node')
+    .attr("transform", function(d) {
+      return "translate(" + source.x0 + "," + source.y0 + ")";
+    });
+
+  // Add Circle for the nodes
+  nodeEnter.append('circle')
+    .attr('class', 'node')
+    .attr('id', function(d) { return d.data.name; })
+    .attr('r', 1e-6)
+    .style("fill", function(d) {
+      return d._children ? "lightsteelblue" : "#fff";
+    });
+
+  // Add labels for the nodes
+  nodeEnter.append('text')
+    .attr("dy", ".35em")
+    .attr("x", function(d) {
+      return d.children || d._children ? -13 : 13;
+    })
+    .attr("text-anchor", function(d) {
+      return d.children || d._children ? "end" : "start";
+    })
+    .text(function(d) { return d.data.name; });
+
+  // UPDATE
+  var nodeUpdate = nodeEnter.merge(node);
+
+  // Transition to the proper position for the node
+  nodeUpdate
+    .attr("transform", function(d) {
+      return "translate(" + d.x + "," + d.y + ")";
+    });
+
+  // Update the node attributes and style
+  nodeUpdate.select('circle.node')
+    .attr('r', 10)
+    .style("fill", function(d) {
+      return d.data.name == bottom_left_post_id ? "#000" : "#fff";
+    })
+    .attr('cursor', 'pointer');
+
+
+  // Remove any exiting nodes
+  var nodeExit = node.exit()
+    .attr("transform", function(d) {
+      return "translate(" + source.x + "," + source.y + ")";
+    })
+    .remove();
+
+  // On exit reduce the node circles size to 0
+  nodeExit.select('circle')
+    .attr('r', 1e-6);
+
+  // On exit reduce the opacity of text labels
+  nodeExit.select('text')
+    .style('fill-opacity', 1e-6);
+
+  // ****************** links section ***************************
+
+  // Update the links...
+  var link = svg.selectAll('path.link')
+    .data(links, function(d) { return d.id; });
+
+  // Enter any new links at the parent's previous position.
+  var linkEnter = link.enter().insert('path', "g")
+    .attr("class", "link")
+    .attr("stroke", "black")
+    .style("fill-opacity", 0)
+    .attr('d', function(d){
+      var o = {x: source.x0, y: source.y0}
+      return diagonal(o, o)
+    });
+
+  // UPDATE
+  var linkUpdate = linkEnter.merge(link);
+
+  // Transition back to the parent element position
+  linkUpdate
+    .attr('d', function(d){ return diagonal(d, d.parent) })
+    .attr("stroke", "black")
+    .style("fill-opacity", 0);
+
+
+  // Remove any exiting links
+  var linkExit = link.exit()
+    .attr('d', function(d) {
+      var o = {x: source.x, y: source.y}
+      return diagonal(o, o)
+    })
+    .attr("stroke", "black")
+    .style("fill-opacity", 0)
+    .remove();
+
+  // Store the old positions for transition.
+  nodes.forEach(function(d){
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+
+  // Creates a curved (diagonal) path from parent to the child nodes
+  function diagonal(s, d) {
+
+    const path = "M" + s.x + "," + s.y
+      + "C" + s.x + "," + (s.y + d.y) / 2
+      + " " + d.x + "," +  (s.y + d.y) / 2
+      + " " + d.x + "," + d.y;
+
+    return path
+  }
+}
+
+
+
+function logPos() {
+  console.log(root_parent);
+  console.log("row0 y: " + document.getElementById("row0").getBoundingClientRect().y);
+  console.log("row1 y: " + document.getElementById("row1").getBoundingClientRect().y);
+  console.log("row2 y: " + document.getElementById("row2").getBoundingClientRect().y);
+}
+
+function logPosCol(row = 0) {
+  console.log(document.getElementById("block" + row + "col0").getBoundingClientRect().x);
+  console.log(document.getElementById("block" + row + "col1").getBoundingClientRect().x);
+  console.log(document.getElementById("block" + row + "col2").getBoundingClientRect().x);
+}
+
+$(function() {
+  layoutSingleton.indexXStackPush();
+  const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/topstories.json");
+  fetchPromise
+    .then(response => {
+      return response.json();
+    })
+    .then(dataa => {
+      topPosts = dataa;
+      console.log("data postindex: " + topPosts[postIndex])
+      root_parent = topPosts[postIndex];
+      top_left_post_id = root_parent;
+      const tempRoot = {"name": root_parent, "parent": null};
+      treeHistory[0] = tempRoot;
+      updateTexts();
+
+      svg = d3.select("body").append("svg")
+        .attr("width", hw)
+        .attr("height", hh)
+        .style("position", "absolute")
+        .style("top", "0px")
+        .style("left", hw + "px")
+        .style("z-index", 100)
+        .append("g")
+        .attr("transform", "translate(" + 0 + "," + hh/12 + ")");
+    })
+    .then(() => {document.getElementById("row2").addEventListener('scroll', scrollHandler);});
+});
+
+function setPostTitle(postIndex) {
+  var postID = topPosts[postIndex];
+  console.log("setPostTitle https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
+  console.log("postID: " + postID);
+  if (layoutSingleton.isPostInTopRow()) {
+    // top left
+    // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
+    console.log("Gonna query: " + searchURLPrefix + postID)
+    const fetchPromise = fetch(searchURLPrefix + postID);
+    fetchPromise
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        // for each kid, get the title
+        if ('key' in data) {
+          parent = data["parent"];
+        } else {
+          parent = root_parent;
+        }
+        console.log("This is supposed to be the title of top left post: " + data["title"]);
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+      })
+
+    console.log("This are the topPosts right before computing the right hand side: " + topPosts);
+    console.log("This is the postIndex: " + postIndex);
+    postID = topPosts[postIndex + 1];
+    // bottom right
+    // const fetchPromise = fetch("https://hacker-news.firebaseio.com/v0/item/" + postID + ".json?print=pretty");
+    console.log("Gonna query: " + searchURLPrefix + postID)
+    const fetchPromiseSecondPost = fetch(searchURLPrefix + postID);
+    fetchPromiseSecondPost
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log("This is supposed to be the title of top right post: " + data["title"]);
+        layoutSingleton.getTopRightElement().children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        layoutSingleton.getTopRightElement().children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+      })
+  }
+}
+
+function setText(postId) {
+  // upper left
+
+  console.log("setText: " + postId);
+  const fetchPromise = fetch(searchURLPrefix + postId);
+  fetchPromise
+    .then(response => {
+      return response.json();
+    })
+    .then(data => {
+      layoutSingleton.setPostKids(data["kids"]);
+      parent = data["parent"];
+      console.log("treeHistory[0]: " + treeHistory[0].name);
+      var node = getNodeFromTree(treeHistory[0], postId);
+      console.log(node);
+      if (node.children == null) {
+        node.children = [];
+      }
+      for (var i = 0; node && i < layoutSingleton.getPostKids().length; i++) {
+        if (getNodeFromTree(node, layoutSingleton.getPostKids()[i]) == null) {
+          node["children"].push({"name" : layoutSingleton.getPostKids()[i], "parent" : postId, "children" : []});
+        }
+      }
+      if (layoutSingleton.isPostInTopRow()) {
+        console.log("kids: " + layoutSingleton.getPostKids());
+        console.log("This is supposed to be tht title: " + data["title"]);
+        $('#block0col0').children('.card-body').children('.card-title').text(htmlDecode(data["title"]));
+        $('#block0col0').children('.card-body').children('.card-text').text(htmlDecode(data["url"]));
+        if (data["url"]){
+          const imgRequest = openGraphURLPrefix + encodeURIComponent(data["url"]);
+          console.log("imgRequest: " + imgRequest);
+          const fetchLinkImagePromise = fetch(imgRequest);
+          fetchLinkImagePromise
+            .then(imageResponse => {
+              return imageResponse.json();
+            }).then(imageData => {
+            console.log("imageData: " + imageData);
+            if (imageData != null) {
+              $('#block0col0').children('.card-img-top').attr("src", imageData);
+            }
+          });
+        }
+      } else if (layoutSingleton.isPostHidden()) {
+        $('#block0col0').children('.card-img-top').attr("src", "");
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
+        layoutSingleton.getTopLeftElement().children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
+      }
+    }).then(() => {
+    // if current item has a kid, save the grandkids
+    if (layoutSingleton.getPostKids().length > 0) {
+      console.log("About to look for grandkids: ", searchURLPrefix + layoutSingleton.getLowerLeftPostId())
+      const fetchPromiseLowerLeftsKids = fetch(searchURLPrefix + layoutSingleton.getLowerLeftPostId());
+      fetchPromiseLowerLeftsKids
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          grandchildren = data["kids"];
+          var node = getNodeFromTree(treeHistory[0], layoutSingleton.getLowerLeftPostId());
+          console.log(node);
+          if (node && node.children == null) {
+            node.children = [];
+          }
+          for (var i = 0; node && i < grandchildren.length; i++) {
+            if (getNodeFromTree(node, grandchildren[i]) == null) {
+              node["children"].push({"name" : grandchildren[i], "parent" : postId, "children" : []});
+            }
+          }
+          console.log("bottom's left's kids: " + grandchildren);
+        }).then(() => {
+        console.log("print what the bottom left id is ", bottom_left_post_id);
+        root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
+        root.x0 = hh / 2;
+        root.y0 = 0;
+        update(root);
+      })
+    }
+  }).then(() => {
+    // lower left
+    // set the title with the poster of the first child and time and text
+    console.log("kids: " + layoutSingleton.getPostKids());
+    console.log("https://hacker-news.firebaseio.com/v0/item/" + layoutSingleton.getLowerLeftPostId() + ".json?print=pretty");
+    const fetchPromiseLowerLeft = fetch(searchURLPrefix + layoutSingleton.getLowerLeftPostId());
+    fetchPromiseLowerLeft
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log("dumpy: " + data["id"]);
+        bottom_left_post_id = data["id"];
+        const cardTitleInfo = data["by"] + " " + timeSince(data["time"]);
+        console.log("cardTitleInfo: " + cardTitleInfo)
+        layoutSingleton.getBottomLeftElement().children('.card-body').children('.card-title').text(cardTitleInfo);
+        const httpDecodedCommentText = htmlDecode(data["text"]);
+        console.log("httpDecodedCommentText: " + httpDecodedCommentText)
+        layoutSingleton.getBottomLeftElement().children('.card-body').children('.card-text').text(httpDecodedCommentText);
+      }).then(() => {
+      console.log("print what the bottom left id is ", bottom_left_post_id);
+      root = d3.hierarchy(treeHistory[0], function(d) { return d.children; });
+      root.x0 = hh / 2;
+      root.y0 = 0;
+      update(root);
+    })
+
+    // lower right
+    // set the title with the poster of the next child and time and text
+    // const fetchPromiseLowerRight = fetch("https://hacker-news.firebaseio.com/v0/item/" + kids[mod(layoutSingleton.getIndexX() + 1, kids.length)] + ".json?print=pretty");
+    const fetchPromiseLowerRight = fetch(searchURLPrefix + layoutSingleton.getLowerRightPostId());
+    fetchPromiseLowerRight
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log("lmaoo: ", layoutSingleton.getPostKids().length);
+        if(layoutSingleton.isThereNoPostInBottomRight()) {
+          console.log("Add blank to the lower right");
+          layoutSingleton.getBottomRightElement().children('.card-body').children('.card-title').text("");
+          layoutSingleton.getBottomRightElement().children('.card-body').children('.card-text').text("");
+        } else {
+          console.log("Filling in the lower right");
+          layoutSingleton.getBottomRightElement().children('.card-body').children('.card-title').text(data["by"] + " " + timeSince(data["time"]));
+          layoutSingleton.getBottomRightElement().children('.card-body').children('.card-text').text(htmlDecode(data["text"]));
+        }
+      })
+  })
+}
+
+function getResult(result) {
+  return result
+}
+
+function updateTexts() {
+  // I can only enter here if I'm a legal move
+  // did the bottom row move?
+  if(layoutSingleton.getBottomLeftElement().position().left < 0){
+    // moved left
+    layoutSingleton.indexXInc();
+  } else if (layoutSingleton.getBottomRightElement().position().left >= 2*hh) {
+    // moved right
+    layoutSingleton.indexXDec();
+  }
+  setPostTitle(postIndex);
+  setText(top_left_post_id);
+}
+
+function scrollHandler(e) {
+  var atSnappingPoint = e.target.scrollLeft % e.target.offsetWidth === 0;
+  var timeOut         = atSnappingPoint ? 0 : 150; //see notes
+
+  clearTimeout(e.target.scrollTimeout);
+  e.target.scrollTimeout = setTimeout(function() {
+    console.log('Scrolling is done!');
+    updateTexts();
+  }, timeOut);
+}

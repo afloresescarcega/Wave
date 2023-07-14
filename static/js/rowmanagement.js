@@ -55,11 +55,6 @@ function logKey(e) {
     $("#row" + mod(indexX + 2, 3)).children(":first").html("" + indexX);
     console.log("X: " + indexX + " Y: " + indexY);
   }
-  // document.getElementById('top-half').style.backgroundColor = colors[mod(indexY, colors.length)]
-  // document.getElementById('bottom-left1').style.backgroundColor = colors[mod((indexY + 1), colors.length)]
-  // document.getElementById('bottom-right1').style.backgroundColor = colors[mod((indexY + 2), colors.length)]
-  // document.getElementById('bottom-left2').style.backgroundColor = colors[mod((indexY + 3), colors.length)]
-  // document.getElementById('bottom-right3').style.backgroundColor = colors[mod((indexY + 4), colors.length)]
   console.log(`${e.code}`);
   update();
 }

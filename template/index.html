@@ -25,7 +25,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
   <script type="text/javascript">
-    const hostAddr = '{{WAVE_STATIC_URL}}';
+    const hostAddr = 'http://{{WAVE_STATIC_URL}}';
   </script>
 
   <script type="module" src="/static/js/index.js"></script>
@@ -70,20 +70,13 @@
 
 <body style="margin: 0%; overflow: hidden; height:100vh">
   <div id="row0" class="block" style="scroll-snap-type: x mandatory; scroll-snap-align:start; left: 0px; bottom: 0px; right: 0px; max-height:50vh; overflow-x:auto; display: block; position:absolute;top:00vh;">
-    <div class="block0 card bg-primary text-white" id="block0col0" style="left:00vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-    <div class="block0 card bg-secondary text-white" id="block0col1" style="left:50vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-    <div class="block0 card bg-success text-white" id="block0col2" style="left:100vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
+    <div class="block0 card bg-primary text-white" id="block0col0" data-post-id="{{ post_info.id }}" style="left:00vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">{{ post_info.title }}</h5><p class="card-text">card text</p></div></div>
+    <div class="block0 card bg-secondary text-white" id="block0col1" data-post-id="{{ post_info.id }}" style="left:50vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
   </div>
   <div id="row1" class="block" style="scroll-snap-type: x mandatory; scroll-snap-align:start; left: 0px; bottom: 0px; right: 0px; max-height:50vh; overflow-x:auto; display: block; position:absolute;top:50vh;">
-    <div class="block1 card bg-danger text-white" id="block1col0" style="left:00vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-    <div class="block1 card bg-warning text-dark" id="block1col1" style="left:50vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-    <div class="block1 card bg-info text-white" id="block1col2" style="left:100vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-
-  </div>
-  <div id="row2" class="block" style="scroll-snap-type: x mandatory; scroll-snap-align:start; left: 0px; bottom: 0px; right: 0px; max-height:50vh; overflow-x:auto; display: block; position:absolute;top:100vh;">
-    <div class="block2 card bg-light text-dark" id="block2col0" style="left:00vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-    <div class="block2 card bg-dark text-white" id="block2col1" style="left:50vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
-    <div class="block2 card bg-white text-dark" id="block2col2" style="left:100vw; "><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title">title</h5><p class="card-text">card text</p></div></div>
+    {% for i in range(kids_info|length) %}
+    <div class="block1 card {{ ['bg-danger text-white', 'bg-warning text-dark', 'bg-info text-white'][i % 3] }}" id="block1col{{ i }}" data-post-id="{{ kids_info[i].id if kids_info[i] is not none else 'No id' }}" style="left:{{ i*50 }}vw; position: absolute;"><img class="card-img-top" src=""><div class="card-body"><h5 class="card-title"><a href="https://news.ycombinator.com/item?id={{ kids_info[i].id if kids_info[i] is not none else 'No id' }}">{{ kids_info[i].by if kids_info[i] is not none else 'No author' }} - {{ kids_info[i].time if kids_info[i] is not none else 'No time' }}</a></h5><p class="card-text">{{ kids_info[i].text|safe if kids_info[i] is not none else 'No text' }}</p></div></div>
+    {% endfor %}
   </div>
 </body>
 </html>
