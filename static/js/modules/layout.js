@@ -45,16 +45,23 @@ export var layoutSingleton = (function() {
       indexX = 0;
     },
     getTopLeftElement: function() {
-      return $("#block" + mod(getIndexY() + 0, 3) + "col" + mod(getIndexX() + 0, 3));
+      return $("#block" + mod(getIndexY() + 1, 4) + "col" + mod(getIndexX() + 1, 4));
     },
     getTopRightElement: function() {
-      return $("#block" + mod(getIndexY() + 0, 3) + "col" + mod(getIndexX() + 1, 3))
+      return $("#block" + mod(getIndexY() + 1, 4) + "col" + mod(getIndexX() + 2, 4))
     },
     getBottomLeftElement: function() {
-      return $("#block" + mod(getIndexY() + 1, 3) + "col" + mod(getIndexX() + 0, 3));
+      const actualBottomLeftId = document.elementFromPoint(0, window.innerHeight / 2 + 1).id.split("col")[1];
+
+      if (mod(getIndexX() + 0, 4) != actualBottomLeftId)
+      {
+        console.error("Bottom left element is not the expected one. Actual: " + actualBottomLeftId + " Expected: " + mod(getIndexX() + 0, 4));
+        return $("#block" + mod(getIndexY() + 2, 4) + "col" + actualBottomLeftId);
+      }
+      return $("#block" + mod(getIndexY() + 2, 4) + "col" + mod(getIndexX() + 0, 4));
     },
     getBottomRightElement: function() {
-      return $("#block" + mod(getIndexY() + 1, 3) + "col" + mod(getIndexX() + 1, 3));
+      return $("#block" + mod(getIndexY() + 2, 4) + "col" + mod(getIndexX() + 1, 4));
     },
     isPostInTopRow: function() {
       return getIndexY() === 0;

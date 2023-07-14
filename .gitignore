@@ -142,3 +142,5 @@ template/index_backup.html
 
 # will insert into the build context of new installations and therefore cause the custom ip from being generated
 host.props
+/.idea
+/app/node_modules/
