@@ -11,5 +11,5 @@ SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 COPY requirements.txt .
 EXPOSE 8080
 RUN pip install --requirement requirements.txt
-COPY . .
+COPY app.py app.py
 CMD ["python", "app.py"]
