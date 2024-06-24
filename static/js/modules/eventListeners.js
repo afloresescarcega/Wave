@@ -15,7 +15,7 @@ function handleArrowUpKeyPress() {
       if (rowHistory.length > currentRow + 1) {
         console.log(`Bottom row: ${JSON.stringify(rowHistory[currentRow + 1])}`);
       }
-    }
+    }}
 function handleArrowUpKeyPress() {
     // Check if the next row is in the history
     if (currentRow < rowHistory.length - 1) {
@@ -81,6 +81,6 @@ function handleArrowDownKeyPress() {
 }
 
 if (event.code === 'ArrowDown') {
-    handleArrowDownKeyPress();
+  handleArrowDownKeyPress();
 }
-});
+
